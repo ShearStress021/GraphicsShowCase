@@ -1,20 +1,24 @@
 #pragma once
-
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
-#include <string>
-#include <optional>
+
+#include <glm/glm.hpp>
 #include <vector>
-#include <string.h>
+#include <optional>
+#include <array>
+#include <string>
 #include <iostream>
 #include <set>
-#include <fstream>
 #include <limits>
+#include <fstream>
 #include <algorithm>
+#include <string.h>
 
 
-namespace triangle 
-{
+
+
+
+namespace triangle {
 
 	const int MAX_FRAMES_IN_FLIGHT = 2;
 
@@ -32,10 +36,7 @@ namespace triangle
 	const bool enableValidationLayers = true;
 #endif
 
-
-
- 	inline VkResult CreateDebugUtilsMessengerEXT(VkInstance instance, const VkDebugUtilsMessengerCreateInfoEXT* pCreateInfo, const VkAllocationCallbacks* pAllocator, VkDebugUtilsMessengerEXT* pDebugMessenger) 
-	{
+	inline VkResult CreateDebugUtilsMessengerEXT(VkInstance instance, const VkDebugUtilsMessengerCreateInfoEXT* pCreateInfo, const VkAllocationCallbacks* pAllocator, VkDebugUtilsMessengerEXT* pDebugMessenger) {
 		auto func = (PFN_vkCreateDebugUtilsMessengerEXT) vkGetInstanceProcAddr(instance, "vkCreateDebugUtilsMessengerEXT");
 		if (func != nullptr) {
 			return func(instance, pCreateInfo, pAllocator, pDebugMessenger);
@@ -66,22 +67,50 @@ namespace triangle
 		std::vector<VkPresentModeKHR> presentModes;
 	};
 
+	struct Vertex {
+		glm::vec2 pos;
+		glm::vec3 color;
+
+		static VkVertexInputBindingDescription getBindingDescription() {
+			VkVertexInputBindingDescription bindingDescription{};
+			bindingDescription.binding = 0;
+			bindingDescription.stride = sizeof(Vertex);
+			bindingDescription.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
+
+			return bindingDescription;
+		}
+
+		static std::array<VkVertexInputAttributeDescription, 2> getAttributeDescriptions() {
+			std::array<VkVertexInputAttributeDescription, 2> attributeDescriptions{};
+
+			attributeDescriptions[0].binding = 0;
+			attributeDescriptions[0].location = 0;
+			attributeDescriptions[0].format = VK_FORMAT_R32G32_SFLOAT;
+			attributeDescriptions[0].offset = offsetof(Vertex, pos);
+
+			attributeDescriptions[1].binding = 0;
+			attributeDescriptions[1].location = 1;
+			attributeDescriptions[1].format = VK_FORMAT_R32G32B32_SFLOAT;
+			attributeDescriptions[1].offset = offsetof(Vertex, color);
+
+			return attributeDescriptions;
+		}
+	};
+
+	const std::vector<Vertex> vertices = {
+		{{0.0f, -0.5f}, {1.0f, 0.0f, 0.0f}},
+		{{0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}},
+		{{-0.5f, 0.5f}, {1.0f, 0.0f, 1.0f}}
+	};
+
 
 	class Triangle {
-
 		public:
 			Triangle(int w, int h, std::string name);
 			void run();
-
-
-
-
-
 			Triangle(const Triangle&) = delete;
 			Triangle& operator=(const Triangle&) = delete;
-
 			~Triangle();
-
 
 
 		private:
@@ -91,17 +120,17 @@ namespace triangle
 
 			GLFWwindow* window{};
 
-			VkInstance instance;
-			VkDebugUtilsMessengerEXT debugMessenger;
-			VkSurfaceKHR surface;
+			VkInstance instance{VK_NULL_HANDLE};
+			VkDebugUtilsMessengerEXT debugMessenger{VK_NULL_HANDLE};
+			VkSurfaceKHR surface{VK_NULL_HANDLE};
 
-			VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
-			VkDevice device;
+			VkPhysicalDevice physicalDevice{VK_NULL_HANDLE};
+			VkDevice device{VK_NULL_HANDLE};
 
-			VkQueue graphicsQueue;
-			VkQueue presentQueue;
+			VkQueue graphicsQueue{VK_NULL_HANDLE};
+			VkQueue presentQueue{VK_NULL_HANDLE};
 
-			VkSwapchainKHR swapChain;
+			VkSwapchainKHR swapChain{VK_NULL_HANDLE};
 			std::vector<VkImage> swapChainImages;
 			VkFormat swapChainImageFormat;
 			VkExtent2D swapChainExtent;
@@ -113,98 +142,71 @@ namespace triangle
 			VkPipeline graphicsPipeline;
 
 			VkCommandPool commandPool;
+
+			VkBuffer vertexBuffer;
+			VkDeviceMemory vertexBufferMemory;
+
 			std::vector<VkCommandBuffer> commandBuffers;
 
 			std::vector<VkSemaphore> imageAvailableSemaphores;
 			std::vector<VkSemaphore> renderFinishedSemaphores;
 			std::vector<VkFence> inFlightFences;
 			uint32_t currentFrame = 0;
-			bool framebufferResized = false;
 
-
+		    bool framebufferResized = false;
 
 			void initWindow();
+			static void framebufferResizeCallback(GLFWwindow* window, int width, int height);
 			void initVulkan();
 			void mainLoop();
-			static void framebufferResizeCallback(GLFWwindow *window, int width, int height);
-
-
-			// Clean Ups
-			void cleanup();
 			void cleanupSwapChain();
+			void cleanup();
 
-
-			// swapChains
 			void recreateSwapChain();
-			void createSwapChain();
-			VkSurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats);
-			VkPresentModeKHR chooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes);
-			VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities);
-			SwapChainSupportDetails querySwapChainSupport(VkPhysicalDevice device);
 
-			// instance
+			// create instance
 			void createInstance();
 			void populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT& createInfo);
-			void setupDebugMessenger();
 
-			// surface
+			void setupDebugMessenger() ;
 			void createSurface();
-
-			// device
+			
 			void pickPhysicalDevice();
-			void createLogicalDevice();
-		    bool isDeviceSuitable(VkPhysicalDevice device);
-			bool checkDeviceExtensionSupport(VkPhysicalDevice device);
-			QueueFamilyIndices findQueueFamilies(VkPhysicalDevice device);
-
-
-			//images
+			void createLogicalDevice() ;
+			void createSwapChain();
 			void createImageViews();
 
-
-
-			// render
 			void createRenderPass();
 			void createGraphicsPipeline();
-
-			
-			//buffer
 			void createFramebuffers();
+			void createCommandPool();
+			void createVertexBuffer();
+			uint32_t findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties);
 			void createCommandBuffers();
 			void recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex);
-
-			//commandPool
-			void createCommandPool();
-
-
-			//extensions
-			std::vector<const char*> getRequiredExtensions();
-			 bool checkValidationLayerSupport() ;
-
-			//command sync
 			void createSyncObjects();
-
-			//drawframe
 			void drawFrame();
-
-
-
-			//create shaders
 			VkShaderModule createShaderModule(const std::vector<char>& code);
+			VkSurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats);
+			VkPresentModeKHR chooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes) ;
+			VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities) ;
+			SwapChainSupportDetails querySwapChainSupport(VkPhysicalDevice device) ;
+			bool isDeviceSuitable(VkPhysicalDevice device) ;
+			bool checkDeviceExtensionSupport(VkPhysicalDevice device);
+			QueueFamilyIndices findQueueFamilies(VkPhysicalDevice device) ;
+		    std::vector<const char*> getRequiredExtensions();
+		 	bool checkValidationLayerSupport();
 			static std::vector<char> readFile(const std::string& filename);
 			static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity, VkDebugUtilsMessageTypeFlagsEXT messageType, const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData, void* pUserData);
 
 
 
-
-
-
-
-
-
-
+			
 
 
 	};
+
+
+
 
 }

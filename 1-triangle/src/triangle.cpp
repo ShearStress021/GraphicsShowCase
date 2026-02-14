@@ -1,41 +1,42 @@
 #include "triangle.hpp"
 
-
-
 namespace triangle {
-
-	Triangle::Triangle(int w, int h, const std::string name) :
+	Triangle::Triangle(int w, int h, std::string name) 
+		:
 		width(w),
 		height(h),
 		windowName(name)
+		{
 
+		}
+
+	Triangle::~Triangle()
 	{
+        cleanup();
 
 	}
-
-    void Triangle::run()
-    {
-        initWindow();
+	void Triangle::run()
+	{
+		initWindow();
         initVulkan();
         mainLoop();
-    }
+	}
 
-	 void  Triangle::initWindow() {
-        glfwInit();
+	void Triangle::initWindow()
+	{
+		glfwInit();
 
         glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 
         window = glfwCreateWindow(width, height, windowName.c_str(), nullptr, nullptr);
         glfwSetWindowUserPointer(window, this);
         glfwSetFramebufferSizeCallback(window, framebufferResizeCallback);
-    }
-
-	 void Triangle::framebufferResizeCallback(GLFWwindow* window, int width, int height) {
+	}
+	void Triangle::framebufferResizeCallback(GLFWwindow* window, int width, int height) {
         auto app = reinterpret_cast<Triangle*>(glfwGetWindowUserPointer(window));
         app->framebufferResized = true;
     }
-
-	 void Triangle::initVulkan() {
+	void Triangle::initVulkan() {
         createInstance();
         setupDebugMessenger();
         createSurface();
@@ -47,6 +48,7 @@ namespace triangle {
         createGraphicsPipeline();
         createFramebuffers();
         createCommandPool();
+        createVertexBuffer();
         createCommandBuffers();
         createSyncObjects();
     }
@@ -60,7 +62,7 @@ namespace triangle {
         vkDeviceWaitIdle(device);
     }
 
-    void Triangle::cleanupSwapChain() {
+   void Triangle::cleanupSwapChain() {
         for (auto framebuffer : swapChainFramebuffers) {
             vkDestroyFramebuffer(device, framebuffer, nullptr);
         }
@@ -72,13 +74,15 @@ namespace triangle {
         vkDestroySwapchainKHR(device, swapChain, nullptr);
     }
 
-     void Triangle::cleanup() {
+   void Triangle::cleanup() {
         cleanupSwapChain();
 
         vkDestroyPipeline(device, graphicsPipeline, nullptr);
         vkDestroyPipelineLayout(device, pipelineLayout, nullptr);
-
         vkDestroyRenderPass(device, renderPass, nullptr);
+
+        vkDestroyBuffer(device, vertexBuffer, nullptr);
+        vkFreeMemory(device, vertexBufferMemory, nullptr);
 
         for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
             vkDestroySemaphore(device, renderFinishedSemaphores[i], nullptr);
@@ -102,7 +106,6 @@ namespace triangle {
         glfwTerminate();
     }
 
-
      void Triangle::recreateSwapChain() {
         int width = 0, height = 0;
         glfwGetFramebufferSize(window, &width, &height);
@@ -119,7 +122,7 @@ namespace triangle {
         createImageViews();
         createFramebuffers();
     }
-
+    
     void Triangle::createInstance() {
         if (enableValidationLayers && !checkValidationLayerSupport()) {
             throw std::runtime_error("validation layers requested, but not available!");
@@ -159,14 +162,13 @@ namespace triangle {
         }
     }
 
-    void Triangle::populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT& createInfo) {
+     void Triangle::populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT& createInfo) {
         createInfo = {};
         createInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
         createInfo.messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
         createInfo.messageType = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
         createInfo.pfnUserCallback = debugCallback;
     }
-
     void Triangle::setupDebugMessenger() {
         if (!enableValidationLayers) return;
 
@@ -177,12 +179,12 @@ namespace triangle {
             throw std::runtime_error("failed to set up debug messenger!");
         }
     }
-
-    void Triangle::createSurface() {
+   void Triangle::createSurface() {
         if (glfwCreateWindowSurface(instance, window, nullptr, &surface) != VK_SUCCESS) {
             throw std::runtime_error("failed to create window surface!");
         }
     }
+
 
     void Triangle::pickPhysicalDevice() {
         uint32_t deviceCount = 0;
@@ -250,8 +252,6 @@ namespace triangle {
         vkGetDeviceQueue(device, indices.graphicsFamily.value(), 0, &graphicsQueue);
         vkGetDeviceQueue(device, indices.presentFamily.value(), 0, &presentQueue);
     }
-
-
     void Triangle::createSwapChain() {
         SwapChainSupportDetails swapChainSupport = querySwapChainSupport(physicalDevice);
 
@@ -302,7 +302,6 @@ namespace triangle {
         swapChainImageFormat = surfaceFormat.format;
         swapChainExtent = extent;
     }
-
     void Triangle::createImageViews() {
         swapChainImageViews.resize(swapChainImages.size());
 
@@ -326,10 +325,8 @@ namespace triangle {
                 throw std::runtime_error("failed to create image views!");
             }
         }
-
     }
-
-     void Triangle::createRenderPass() {
+    void Triangle::createRenderPass() {
         VkAttachmentDescription colorAttachment{};
         colorAttachment.format = swapChainImageFormat;
         colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
@@ -370,8 +367,7 @@ namespace triangle {
             throw std::runtime_error("failed to create render pass!");
         }
     }
-
-     void Triangle::createGraphicsPipeline() {
+    void Triangle::createGraphicsPipeline() {
         auto vertShaderCode = readFile("shaders/shader.vert.spv");
         auto fragShaderCode = readFile("shaders/shader.frag.spv");
 
@@ -394,8 +390,14 @@ namespace triangle {
 
         VkPipelineVertexInputStateCreateInfo vertexInputInfo{};
         vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
-        vertexInputInfo.vertexBindingDescriptionCount = 0;
-        vertexInputInfo.vertexAttributeDescriptionCount = 0;
+
+        auto bindingDescription = Vertex::getBindingDescription();
+        auto attributeDescriptions = Vertex::getAttributeDescriptions();
+
+        vertexInputInfo.vertexBindingDescriptionCount = 1;
+        vertexInputInfo.vertexAttributeDescriptionCount = static_cast<uint32_t>(attributeDescriptions.size());
+        vertexInputInfo.pVertexBindingDescriptions = &bindingDescription;
+        vertexInputInfo.pVertexAttributeDescriptions = attributeDescriptions.data();
 
         VkPipelineInputAssemblyStateCreateInfo inputAssembly{};
         inputAssembly.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
@@ -478,8 +480,7 @@ namespace triangle {
         vkDestroyShaderModule(device, fragShaderModule, nullptr);
         vkDestroyShaderModule(device, vertShaderModule, nullptr);
     }
-
-     void Triangle::createFramebuffers() {
+    void Triangle::createFramebuffers() {
         swapChainFramebuffers.resize(swapChainImageViews.size());
 
         for (size_t i = 0; i < swapChainImageViews.size(); i++) {
@@ -501,7 +502,6 @@ namespace triangle {
             }
         }
     }
-
     void Triangle::createCommandPool() {
         QueueFamilyIndices queueFamilyIndices = findQueueFamilies(physicalDevice);
 
@@ -515,7 +515,49 @@ namespace triangle {
         }
     }
 
+     void Triangle::createVertexBuffer() {
+        VkBufferCreateInfo bufferInfo{};
+        bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+        bufferInfo.size = sizeof(vertices[0]) * vertices.size();
+        bufferInfo.usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
+        bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
+        if (vkCreateBuffer(device, &bufferInfo, nullptr, &vertexBuffer) != VK_SUCCESS) {
+            throw std::runtime_error("failed to create vertex buffer!");
+        }
+
+        VkMemoryRequirements memRequirements;
+        vkGetBufferMemoryRequirements(device, vertexBuffer, &memRequirements);
+
+        VkMemoryAllocateInfo allocInfo{};
+        allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+        allocInfo.allocationSize = memRequirements.size;
+        allocInfo.memoryTypeIndex = findMemoryType(memRequirements.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+
+        if (vkAllocateMemory(device, &allocInfo, nullptr, &vertexBufferMemory) != VK_SUCCESS) {
+            throw std::runtime_error("failed to allocate vertex buffer memory!");
+        }
+
+        vkBindBufferMemory(device, vertexBuffer, vertexBufferMemory, 0);
+
+        void* data;
+        vkMapMemory(device, vertexBufferMemory, 0, bufferInfo.size, 0, &data);
+            memcpy(data, vertices.data(), (size_t) bufferInfo.size);
+        vkUnmapMemory(device, vertexBufferMemory);
+    }
+
+     uint32_t Triangle::findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties) {
+        VkPhysicalDeviceMemoryProperties memProperties;
+        vkGetPhysicalDeviceMemoryProperties(physicalDevice, &memProperties);
+
+        for (uint32_t i = 0; i < memProperties.memoryTypeCount; i++) {
+            if ((typeFilter & (1 << i)) && (memProperties.memoryTypes[i].propertyFlags & properties) == properties) {
+                return i;
+            }
+        }
+
+        throw std::runtime_error("failed to find suitable memory type!");
+    }
     void Triangle::createCommandBuffers() {
         commandBuffers.resize(MAX_FRAMES_IN_FLIGHT);
 
@@ -530,7 +572,7 @@ namespace triangle {
         }
     }
 
-    void Triangle::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex) {
+     void Triangle::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex) {
         VkCommandBufferBeginInfo beginInfo{};
         beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
 
@@ -567,7 +609,11 @@ namespace triangle {
             scissor.extent = swapChainExtent;
             vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
 
-            vkCmdDraw(commandBuffer, 3, 1, 0, 0);
+            VkBuffer vertexBuffers[] = {vertexBuffer};
+            VkDeviceSize offsets[] = {0};
+            vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
+
+            vkCmdDraw(commandBuffer, static_cast<uint32_t>(vertices.size()), 1, 0, 0);
 
         vkCmdEndRenderPass(commandBuffer);
 
@@ -575,7 +621,6 @@ namespace triangle {
             throw std::runtime_error("failed to record command buffer!");
         }
     }
-
     void Triangle::createSyncObjects() {
         imageAvailableSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
         renderFinishedSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
@@ -596,8 +641,6 @@ namespace triangle {
             }
         }
     }
-
-
     void Triangle::drawFrame() {
         vkWaitForFences(device, 1, &inFlightFences[currentFrame], VK_TRUE, UINT64_MAX);
 
@@ -660,7 +703,6 @@ namespace triangle {
         currentFrame = (currentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
     }
 
-
      VkShaderModule Triangle::createShaderModule(const std::vector<char>& code) {
         VkShaderModuleCreateInfo createInfo{};
         createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
@@ -675,6 +717,7 @@ namespace triangle {
         return shaderModule;
     }
 
+
      VkSurfaceFormatKHR Triangle::chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats) {
         for (const auto& availableFormat : availableFormats) {
             if (availableFormat.format == VK_FORMAT_B8G8R8A8_SRGB && availableFormat.colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR) {
@@ -684,6 +727,7 @@ namespace triangle {
 
         return availableFormats[0];
     }
+
     VkPresentModeKHR Triangle::chooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes) {
         for (const auto& availablePresentMode : availablePresentModes) {
             if (availablePresentMode == VK_PRESENT_MODE_MAILBOX_KHR) {
@@ -693,8 +737,7 @@ namespace triangle {
 
         return VK_PRESENT_MODE_FIFO_KHR;
     }
-
-    VkExtent2D Triangle::chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities) {
+      VkExtent2D Triangle::chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities) {
         if (capabilities.currentExtent.width != std::numeric_limits<uint32_t>::max()) {
             return capabilities.currentExtent;
         } else {
@@ -712,6 +755,7 @@ namespace triangle {
             return actualExtent;
         }
     }
+
 
     SwapChainSupportDetails Triangle::querySwapChainSupport(VkPhysicalDevice device) {
         SwapChainSupportDetails details;
@@ -736,8 +780,7 @@ namespace triangle {
 
         return details;
     }
-
-   bool Triangle::isDeviceSuitable(VkPhysicalDevice device) {
+      bool Triangle::isDeviceSuitable(VkPhysicalDevice device) {
         QueueFamilyIndices indices = findQueueFamilies(device);
 
         bool extensionsSupported = checkDeviceExtensionSupport(device);
@@ -750,8 +793,7 @@ namespace triangle {
 
         return indices.isComplete() && extensionsSupported && swapChainAdequate;
     }
-
-     bool Triangle::checkDeviceExtensionSupport(VkPhysicalDevice device) {
+    bool Triangle::checkDeviceExtensionSupport(VkPhysicalDevice device) {
         uint32_t extensionCount;
         vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionCount, nullptr);
 
@@ -766,7 +808,6 @@ namespace triangle {
 
         return requiredExtensions.empty();
     }
-
      QueueFamilyIndices Triangle::findQueueFamilies(VkPhysicalDevice device) {
         QueueFamilyIndices indices;
 
@@ -837,8 +878,7 @@ namespace triangle {
 
         return true;
     }
-
-   std::vector<char> Triangle::readFile(const std::string& filename) {
+    std::vector<char> Triangle::readFile(const std::string& filename) {
         std::ifstream file(filename, std::ios::ate | std::ios::binary);
 
         if (!file.is_open()) {
@@ -854,9 +894,9 @@ namespace triangle {
         file.close();
 
         return buffer;
-    }
 
-   VKAPI_ATTR VkBool32 VKAPI_CALL Triangle::debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity, VkDebugUtilsMessageTypeFlagsEXT messageType, const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData, void* pUserData) {
+    }
+    VKAPI_ATTR VkBool32 VKAPI_CALL Triangle::debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity, VkDebugUtilsMessageTypeFlagsEXT messageType, const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData, void* pUserData) {
         std::cerr << "validation layer: " << pCallbackData->pMessage << std::endl;
 
         return VK_FALSE;
@@ -866,12 +906,5 @@ namespace triangle {
 
 
 
-
-
-		
-
-	Triangle::~Triangle()
-	{
-        cleanup();
-	}
 }
+

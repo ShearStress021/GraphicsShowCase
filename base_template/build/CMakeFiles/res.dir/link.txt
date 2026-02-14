@@ -1,0 +1,1 @@
+/usr/bin/c++ -Wl,--dependency-file=CMakeFiles/res.dir/link.d CMakeFiles/res.dir/src/main.cpp.o CMakeFiles/res.dir/src/triangle.cpp.o -o res  _deps/glfw-build/src/libglfw3.a /usr/lib/x86_64-linux-gnu/libvulkan.so -ldl /usr/lib/x86_64-linux-gnu/librt.a -lm -ldl /usr/lib/x86_64-linux-gnu/libX11.so
