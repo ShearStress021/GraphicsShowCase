@@ -595,6 +595,9 @@ namespace triangle {
     }
 
      void Triangle::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex) {
+        static int frame{};
+
+        frame = (frame + 1) % 1000;
         VkCommandBufferBeginInfo beginInfo{};
         beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
 
@@ -609,7 +612,7 @@ namespace triangle {
         renderPassInfo.renderArea.offset = {0, 0};
         renderPassInfo.renderArea.extent = swapChainExtent;
 
-        VkClearValue clearColor = {{{0.0f, 0.0f, 0.0f, 1.0f}}};
+        VkClearValue clearColor = {{{0.5f, 0.1f, 0.3f, 1.0f}}};
         renderPassInfo.clearValueCount = 1;
         renderPassInfo.pClearValues = &clearColor;
 
@@ -640,7 +643,7 @@ namespace triangle {
             for (int  j = 0; j < 4; j++)
             {
                 SimplePushConstantData push{};
-                push.offset = {0.0f, -0.4f + j * 0.25f};
+                push.offset = {-0.0f + j  , -0.4f + j * 0.25f};
 
                 push.color = {0.f,0.f,0.2f + 0.2f * j};
 
