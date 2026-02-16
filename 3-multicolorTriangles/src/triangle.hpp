@@ -75,9 +75,15 @@ namespace triangle {
 	};
 
 	const std::vector<Vertex> vertices = {
+		
+		{{-0.5, -0.2}, {1.0f, 1.0f, 1.0f}},
 		{{-0.8, -0.8}, {1.0f, 0.0f, 0.0f}},
 		{{-0.2, -0.8}, {1.0f, 0.0f, 0.0f}},
-		{{-0.5, -0.2}, {1.0f, 1.0f, 1.0f}},
+
+
+		{{-0.5, 0.2}, {1.0f, 1.0f, 1.0f}},
+		{{-0.2, 0.8}, {0.0f, 0.0f, 1.0f}},
+		{{-0.8, 0.8}, {0.0f, 0.0f, 1.0f}},
 
 		// Top-right triangle (Clockwise)
 		{{0.2, -0.8}, {1.0f, 0.0f, 1.0f}},
@@ -85,9 +91,6 @@ namespace triangle {
 		{{0.5, -0.2}, {1.0f, 1.0f, 1.0f}},
 
 		// Bottom-left triangle (Clockwise)
-		{{-0.5, 0.2}, {1.0f, 1.0f, 1.0f}},
-		{{-0.2, 0.8}, {0.0f, 0.0f, 1.0f}},
-		{{-0.8, 0.8}, {0.0f, 0.0f, 1.0f}},
 
 		// Bottom-right triangle (Clockwise)
 		{{0.5, 0.2}, {1.0f, 1.0f, 1.0f}},
