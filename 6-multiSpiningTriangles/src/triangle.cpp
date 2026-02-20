@@ -646,16 +646,19 @@ namespace triangle {
             std::cout << gameobjects.size() << '\n';
 
 
+            int i{};
 
             for (auto& obj : gameobjects)
             {
 
-                obj.transform2D.rotation = glm::mod(obj.transform2D.rotation + 0.0001f, glm::two_pi<float>());
+                obj.transform2D.rotation = glm::mod(obj.transform2D.rotation + 0.00001f * i, glm::two_pi<float>());
                 SimplePushConstantData push{};
                 push.offset = obj.transform2D.translation;
 
                 push.color = obj.color;
                 push.transform = obj.transform2D.mat2();
+
+                i++;
 
 
 
@@ -962,12 +965,19 @@ namespace triangle {
 
     void Triangle::loadGameObjects()
     {
+        std::vector<glm::vec3> colors{
+          {1.f, .7f, .73f},
+          {1.f, .87f, .73f},
+          {1.f, 1.f, .73f},
+          {.73f, 1.f, .8f},
+          {.73, .88f, 1.f}  //
+        };
         for (int i = 0; i < 40; i ++){
             auto triangle = GameObject::createGameObjects();
-            triangle.color = {.1f, .8f, .1f};
-            triangle.transform2D.translation.x = .2f;
-            triangle.transform2D.scale = {2.f, 0.5f};
-            triangle.transform2D.rotation = .25f * glm::two_pi<float>();
+            triangle.color = colors[i % colors.size()];
+//            triangle.transform2D.translation.x = .2f;
+            triangle.transform2D.scale = glm::vec2(0.5f)+ i * 0.025f;
+            triangle.transform2D.rotation = i * glm::pi<float>() * 0.025f; 
             gameobjects.push_back(std::move(triangle));
 
 
