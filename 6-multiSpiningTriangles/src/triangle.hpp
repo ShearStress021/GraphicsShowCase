@@ -2,23 +2,22 @@
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 
-#define GLM_FORCE_RADIANS
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/constants.hpp>
 
-#include <iostream>
-#include <fstream>
-#include <stdexcept>
-#include <algorithm>
-#include <chrono>
+#include <glm/glm.hpp>
 #include <vector>
-#include <cstring>
-#include <cstdlib>
-#include <cstdint>
-#include <limits>
-#include <array>
 #include <optional>
+#include <array>
+#include <string>
+#include <iostream>
 #include <set>
+#include <limits>
+#include <fstream>
+#include <algorithm>
+#include <string.h>
+
+#include "gameobjects.hpp"
+
 
 
 
@@ -74,33 +73,24 @@ namespace triangle {
 
 	struct Vertex {
 		glm::vec2 pos;
-		glm::vec3 color;
+		alignas(16) glm::vec3 color;
 
 
 	};
-	struct UniformBufferObject {
 
-		alignas(16) glm::mat4 model;
-		alignas(16) glm::mat4 view;
-		alignas(16) glm::mat4 proj;
-
+	struct SimplePushConstantData
+	{
+		glm::mat2 transform{1.f};
+		glm::vec2 offset;
+		alignas(16) glm::vec3 color;
 	};
 
 
 	const std::vector<Vertex> vertices = {
-		  {{-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}},
-    {{0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}},
-    {{0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}},
-    {{-0.5f, 0.5f}, {1.0f, 1.0f, 1.0f}}
-
-
-
-
+		{{0.0f, -0.5f}, {1.0f, 0.0f, 0.0f}},
+		{{0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}},
+		{{-0.5f, 0.5f}, {1.0f, 0.0f, 1.0f}}
 	};
-	const std::vector<uint16_t> indices = {
-			0, 1, 2, 2, 3, 0
-	};
-
 
 
 	class Triangle {
@@ -117,19 +107,19 @@ namespace triangle {
 			const uint32_t height{};
 			const std::string windowName{};
 
-			GLFWwindow* window;
+			GLFWwindow* window{};
 
-			VkInstance instance;
-			VkDebugUtilsMessengerEXT debugMessenger;
-			VkSurfaceKHR surface;
+			VkInstance instance{VK_NULL_HANDLE};
+			VkDebugUtilsMessengerEXT debugMessenger{VK_NULL_HANDLE};
+			VkSurfaceKHR surface{VK_NULL_HANDLE};
 
-			VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
-			VkDevice device;
+			VkPhysicalDevice physicalDevice{VK_NULL_HANDLE};
+			VkDevice device{VK_NULL_HANDLE};
 
-			VkQueue graphicsQueue;
-			VkQueue presentQueue;
+			VkQueue graphicsQueue{VK_NULL_HANDLE};
+			VkQueue presentQueue{VK_NULL_HANDLE};
 
-			VkSwapchainKHR swapChain;
+			VkSwapchainKHR swapChain{VK_NULL_HANDLE};
 			std::vector<VkImage> swapChainImages;
 			VkFormat swapChainImageFormat;
 			VkExtent2D swapChainExtent;
@@ -137,7 +127,6 @@ namespace triangle {
 			std::vector<VkFramebuffer> swapChainFramebuffers;
 
 			VkRenderPass renderPass;
-			VkDescriptorSetLayout descriptorSetLayout;
 			VkPipelineLayout pipelineLayout;
 			VkPipeline graphicsPipeline;
 
@@ -145,15 +134,6 @@ namespace triangle {
 
 			VkBuffer vertexBuffer;
 			VkDeviceMemory vertexBufferMemory;
-			VkBuffer indexBuffer;
-			VkDeviceMemory indexBufferMemory;
-
-			std::vector<VkBuffer> uniformBuffers;
-			std::vector<VkDeviceMemory> uniformBuffersMemory;
-			std::vector<void*> uniformBuffersMapped;
-
-			VkDescriptorPool descriptorPool;
-			std::vector<VkDescriptorSet> descriptorSets;
 
 			std::vector<VkCommandBuffer> commandBuffers;
 
@@ -162,8 +142,10 @@ namespace triangle {
 			std::vector<VkFence> inFlightFences;
 			uint32_t currentFrame = 0;
 
-			bool framebufferResized = false;
+		    bool framebufferResized = false;
 
+
+			std::vector<GameObject> gameobjects;
 
 			void initWindow();
 			static void framebufferResizeCallback(GLFWwindow* window, int width, int height);
@@ -195,24 +177,6 @@ namespace triangle {
 			void createCommandBuffers();
 			void recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex);
 			void createSyncObjects();
-
-			// descriptorSets
-			void createDescriptorSetLayout() ;
-			void createDescriptorPool();
-			void createDescriptorSets() ;
-
-			// index buffers
-			void createIndexBuffer();
-			void createUniformBuffers();
-
-
-			void createBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer& buffer, VkDeviceMemory& bufferMemory);
-			void copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size) ;
-
-			void updateUniformBuffer(uint32_t currentImage) ;
-
-
-
 			void drawFrame();
 			VkShaderModule createShaderModule(const std::vector<char>& code);
 			VkSurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats);
@@ -226,6 +190,10 @@ namespace triangle {
 		 	bool checkValidationLayerSupport();
 			static std::vector<char> readFile(const std::string& filename);
 			static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity, VkDebugUtilsMessageTypeFlagsEXT messageType, const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData, void* pUserData);
+
+
+
+			void loadGameObjects();
 
 
 
