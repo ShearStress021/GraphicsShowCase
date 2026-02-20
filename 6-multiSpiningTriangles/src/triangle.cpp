@@ -643,7 +643,6 @@ namespace triangle {
 
            
 
-            std::cout << gameobjects.size() << '\n';
 
 
             int i{};
@@ -966,7 +965,7 @@ namespace triangle {
     void Triangle::loadGameObjects()
     {
         std::vector<glm::vec3> colors{
-          {1.f, .7f, .73f},
+          {1.f, .0f, .43f},
           {1.f, .87f, .73f},
           {1.f, 1.f, .73f},
           {.73f, 1.f, .8f},
