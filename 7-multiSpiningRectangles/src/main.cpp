@@ -1,4 +1,4 @@
-#include "triangle.hpp"
+#include "rectangle.hpp"
 #include <iostream>
 
 
@@ -8,7 +8,7 @@
 int main()
 {
 	
-	triangle::Triangle app{WIDTH,HEIGHT, "My Triangle"};
+	rectangle::Rectangle app{WIDTH,HEIGHT, "My Rectangle"};
 
 	try {
         app.run();

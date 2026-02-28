@@ -1,9 +1,9 @@
 #pragma once
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
+#include "gameObjects.hpp"
 
 #include <glm/gtc/constants.hpp>
-
 #include <glm/glm.hpp>
 #include <vector>
 #include <optional>
@@ -15,8 +15,6 @@
 #include <fstream>
 #include <algorithm>
 #include <string.h>
-
-#include "gameobjects.hpp"
 
 
 
@@ -73,7 +71,7 @@ namespace rectangle{
 
 	struct Vertex {
 		glm::vec2 pos;
-		alignas(16) glm::vec3 color;
+		glm::vec3 color;
 
 
 	};
@@ -83,13 +81,25 @@ namespace rectangle{
 		glm::mat2 transform{1.f};
 		glm::vec2 offset;
 		alignas(16) glm::vec3 color;
+
 	};
 
 
+
+
 	const std::vector<Vertex> vertices = {
-		{{0.0f, -0.5f}, {1.0f, 0.0f, 0.0f}},
-		{{0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}},
-		{{-0.5f, 0.5f}, {1.0f, 0.0f, 1.0f}}
+		{{-0.3f, -0.3f}, {1.0f, 0.0f, 0.0f}},
+		{{0.3f, -0.3f}, {0.0f, 1.0f, 0.0f}},
+		{{0.3f, 0.3f}, {0.0f, 0.0f, 1.0f}},
+		{{-0.3f, 0.3f}, {1.0f, 1.0f, 1.0f}}
+		//{{0.0f, -0.5f}, {1.0f, 0.0f, 0.0f}},
+	//	{{0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}},
+	//	{{-0.5f, 0.5f}, {1.0f, 0.0f, 1.0f}}
+	};
+
+
+	const std::vector<uint16_t> indices = {
+		0, 1, 2, 2, 3, 0
 	};
 
 
@@ -134,6 +144,8 @@ namespace rectangle{
 
 			VkBuffer vertexBuffer;
 			VkDeviceMemory vertexBufferMemory;
+			VkBuffer indexBuffer;
+			VkDeviceMemory indexBufferMemory;
 
 			std::vector<VkCommandBuffer> commandBuffers;
 
@@ -144,8 +156,7 @@ namespace rectangle{
 
 		    bool framebufferResized = false;
 
-
-			std::vector<GameObject> gameobjects;
+			std::vector<GameObject> gameObjects;
 
 			void initWindow();
 			static void framebufferResizeCallback(GLFWwindow* window, int width, int height);
@@ -173,6 +184,10 @@ namespace rectangle{
 			void createFramebuffers();
 			void createCommandPool();
 			void createVertexBuffer();
+			void createIndexBuffer();
+			void createBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, 
+					 VkBuffer& buffer, VkDeviceMemory& bufferMemory) ;
+			void copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size);
 			uint32_t findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties);
 			void createCommandBuffers();
 			void recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex);
@@ -193,10 +208,8 @@ namespace rectangle{
 
 
 
+
 			void loadGameObjects();
-
-
-
 			
 
 

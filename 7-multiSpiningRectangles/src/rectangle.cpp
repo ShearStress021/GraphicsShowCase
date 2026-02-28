@@ -1,8 +1,7 @@
-#include "triangle.hpp"
-#include "gameobjects.hpp"
+#include "rectangle.hpp"
 
 namespace rectangle{
-	Triangle::Triangle(int w, int h, std::string name) 
+	Rectangle::Rectangle(int w, int h, std::string name) 
 		:
 		width(w),
 		height(h),
@@ -11,12 +10,12 @@ namespace rectangle{
 
 		}
 
-	Triangle::~Triangle()
+	Rectangle::~Rectangle()
 	{
         cleanup();
 
 	}
-	void Triangle::run()
+	void Rectangle::run()
 	{
         loadGameObjects();
 		initWindow();
@@ -24,7 +23,7 @@ namespace rectangle{
         mainLoop();
 	}
 
-	void Triangle::initWindow()
+	void Rectangle::initWindow()
 	{
 		glfwInit();
 
@@ -34,11 +33,11 @@ namespace rectangle{
         glfwSetWindowUserPointer(window, this);
         glfwSetFramebufferSizeCallback(window, framebufferResizeCallback);
 	}
-	void Triangle::framebufferResizeCallback(GLFWwindow* window, int width, int height) {
-        auto app = reinterpret_cast<Triangle*>(glfwGetWindowUserPointer(window));
+	void Rectangle::framebufferResizeCallback(GLFWwindow* window, int width, int height) {
+        auto app = reinterpret_cast<Rectangle*>(glfwGetWindowUserPointer(window));
         app->framebufferResized = true;
     }
-	void Triangle::initVulkan() {
+	void Rectangle::initVulkan() {
         createInstance();
         setupDebugMessenger();
         createSurface();
@@ -51,11 +50,12 @@ namespace rectangle{
         createFramebuffers();
         createCommandPool();
         createVertexBuffer();
+        createIndexBuffer();
         createCommandBuffers();
         createSyncObjects();
     }
 
-    void Triangle::mainLoop() {
+    void Rectangle::mainLoop() {
         while (!glfwWindowShouldClose(window)) {
             glfwPollEvents();
             drawFrame();
@@ -64,7 +64,7 @@ namespace rectangle{
         vkDeviceWaitIdle(device);
     }
 
-   void Triangle::cleanupSwapChain() {
+   void Rectangle::cleanupSwapChain() {
         for (auto framebuffer : swapChainFramebuffers) {
             vkDestroyFramebuffer(device, framebuffer, nullptr);
         }
@@ -76,12 +76,15 @@ namespace rectangle{
         vkDestroySwapchainKHR(device, swapChain, nullptr);
     }
 
-   void Triangle::cleanup() {
+   void Rectangle::cleanup() {
         cleanupSwapChain();
 
         vkDestroyPipeline(device, graphicsPipeline, nullptr);
         vkDestroyPipelineLayout(device, pipelineLayout, nullptr);
         vkDestroyRenderPass(device, renderPass, nullptr);
+
+        vkDestroyBuffer(device, indexBuffer, nullptr);
+        vkFreeMemory(device, indexBufferMemory, nullptr);
 
         vkDestroyBuffer(device, vertexBuffer, nullptr);
         vkFreeMemory(device, vertexBufferMemory, nullptr);
@@ -106,9 +109,11 @@ namespace rectangle{
         glfwDestroyWindow(window);
 
         glfwTerminate();
+
+
     }
 
-     void Triangle::recreateSwapChain() {
+     void Rectangle::recreateSwapChain() {
         int width = 0, height = 0;
         glfwGetFramebufferSize(window, &width, &height);
         while (width == 0 || height == 0) {
@@ -125,14 +130,14 @@ namespace rectangle{
         createFramebuffers();
     }
     
-    void Triangle::createInstance() {
+    void Rectangle::createInstance() {
         if (enableValidationLayers && !checkValidationLayerSupport()) {
             throw std::runtime_error("validation layers requested, but not available!");
         }
 
         VkApplicationInfo appInfo{};
         appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
-        appInfo.pApplicationName = "Hello Triangle";
+        appInfo.pApplicationName = "Hello Rectangle";
         appInfo.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
         appInfo.pEngineName = "No Engine";
         appInfo.engineVersion = VK_MAKE_VERSION(1, 0, 0);
@@ -164,14 +169,16 @@ namespace rectangle{
         }
     }
 
-     void Triangle::populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT& createInfo) {
+     void Rectangle::populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT& createInfo) {
         createInfo = {};
         createInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
         createInfo.messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
         createInfo.messageType = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
         createInfo.pfnUserCallback = debugCallback;
     }
-    void Triangle::setupDebugMessenger() {
+
+
+    void Rectangle::setupDebugMessenger() {
         if (!enableValidationLayers) return;
 
         VkDebugUtilsMessengerCreateInfoEXT createInfo;
@@ -181,14 +188,14 @@ namespace rectangle{
             throw std::runtime_error("failed to set up debug messenger!");
         }
     }
-   void Triangle::createSurface() {
+   void Rectangle::createSurface() {
         if (glfwCreateWindowSurface(instance, window, nullptr, &surface) != VK_SUCCESS) {
             throw std::runtime_error("failed to create window surface!");
         }
     }
 
 
-    void Triangle::pickPhysicalDevice() {
+    void Rectangle::pickPhysicalDevice() {
         uint32_t deviceCount = 0;
         vkEnumeratePhysicalDevices(instance, &deviceCount, nullptr);
 
@@ -211,7 +218,7 @@ namespace rectangle{
         }
     }
 
-    void Triangle::createLogicalDevice() {
+    void Rectangle::createLogicalDevice() {
         QueueFamilyIndices indices = findQueueFamilies(physicalDevice);
 
         std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
@@ -254,7 +261,7 @@ namespace rectangle{
         vkGetDeviceQueue(device, indices.graphicsFamily.value(), 0, &graphicsQueue);
         vkGetDeviceQueue(device, indices.presentFamily.value(), 0, &presentQueue);
     }
-    void Triangle::createSwapChain() {
+    void Rectangle::createSwapChain() {
         SwapChainSupportDetails swapChainSupport = querySwapChainSupport(physicalDevice);
 
         VkSurfaceFormatKHR surfaceFormat = chooseSwapSurfaceFormat(swapChainSupport.formats);
@@ -304,7 +311,7 @@ namespace rectangle{
         swapChainImageFormat = surfaceFormat.format;
         swapChainExtent = extent;
     }
-    void Triangle::createImageViews() {
+    void Rectangle::createImageViews() {
         swapChainImageViews.resize(swapChainImages.size());
 
         for (size_t i = 0; i < swapChainImages.size(); i++) {
@@ -328,7 +335,7 @@ namespace rectangle{
             }
         }
     }
-    void Triangle::createRenderPass() {
+    void Rectangle::createRenderPass() {
         VkAttachmentDescription colorAttachment{};
         colorAttachment.format = swapChainImageFormat;
         colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
@@ -369,7 +376,7 @@ namespace rectangle{
             throw std::runtime_error("failed to create render pass!");
         }
     }
-    void Triangle::createGraphicsPipeline() {
+    void Rectangle::createGraphicsPipeline() {
         auto vertShaderCode = readFile("shaders/shader.vert.spv");
         auto fragShaderCode = readFile("shaders/shader.frag.spv");
 
@@ -507,7 +514,7 @@ namespace rectangle{
         vkDestroyShaderModule(device, fragShaderModule, nullptr);
         vkDestroyShaderModule(device, vertShaderModule, nullptr);
     }
-    void Triangle::createFramebuffers() {
+    void Rectangle::createFramebuffers() {
         swapChainFramebuffers.resize(swapChainImageViews.size());
 
         for (size_t i = 0; i < swapChainImageViews.size(); i++) {
@@ -529,7 +536,7 @@ namespace rectangle{
             }
         }
     }
-    void Triangle::createCommandPool() {
+    void Rectangle::createCommandPool() {
         QueueFamilyIndices queueFamilyIndices = findQueueFamilies(physicalDevice);
 
         VkCommandPoolCreateInfo poolInfo{};
@@ -542,35 +549,104 @@ namespace rectangle{
         }
     }
 
-     void Triangle::createVertexBuffer() {
+     void Rectangle::createVertexBuffer() {
+
+         VkDeviceSize bufferSize = sizeof(vertices[0]) * vertices.size();
+
+        VkBuffer stagingBuffer;
+        VkDeviceMemory stagingBufferMemory;
+        createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingBuffer, stagingBufferMemory);
+
+        void* data;
+        vkMapMemory(device, stagingBufferMemory, 0, bufferSize, 0, &data);
+            memcpy(data, vertices.data(), (size_t) bufferSize);
+        vkUnmapMemory(device, stagingBufferMemory);
+
+        createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, vertexBuffer, vertexBufferMemory);
+
+        copyBuffer(stagingBuffer, vertexBuffer, bufferSize);
+
+        vkDestroyBuffer(device, stagingBuffer, nullptr);
+        vkFreeMemory(device, stagingBufferMemory, nullptr);
+    }
+     void Rectangle::createIndexBuffer() {
+        VkDeviceSize bufferSize = sizeof(indices[0]) * indices.size();
+
+        VkBuffer stagingBuffer;
+        VkDeviceMemory stagingBufferMemory;
+        createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingBuffer, stagingBufferMemory);
+
+        void* data;
+        vkMapMemory(device, stagingBufferMemory, 0, bufferSize, 0, &data);
+            memcpy(data, indices.data(), (size_t) bufferSize);
+        vkUnmapMemory(device, stagingBufferMemory);
+
+        createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, indexBuffer, indexBufferMemory);
+
+        copyBuffer(stagingBuffer, indexBuffer, bufferSize);
+
+        vkDestroyBuffer(device, stagingBuffer, nullptr);
+        vkFreeMemory(device, stagingBufferMemory, nullptr);
+    }
+     void Rectangle::createBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer& buffer, VkDeviceMemory& bufferMemory) {
         VkBufferCreateInfo bufferInfo{};
         bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-        bufferInfo.size = sizeof(vertices[0]) * vertices.size(); bufferInfo.usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT; bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
-        if (vkCreateBuffer(device, &bufferInfo, nullptr, &vertexBuffer) != VK_SUCCESS) {
-            throw std::runtime_error("failed to create vertex buffer!");
+        bufferInfo.size = size;
+        bufferInfo.usage = usage;
+        bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+
+        if (vkCreateBuffer(device, &bufferInfo, nullptr, &buffer) != VK_SUCCESS) {
+            throw std::runtime_error("failed to create buffer!");
         }
 
         VkMemoryRequirements memRequirements;
-        vkGetBufferMemoryRequirements(device, vertexBuffer, &memRequirements);
+        vkGetBufferMemoryRequirements(device, buffer, &memRequirements);
 
         VkMemoryAllocateInfo allocInfo{};
         allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
         allocInfo.allocationSize = memRequirements.size;
-        allocInfo.memoryTypeIndex = findMemoryType(memRequirements.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+        allocInfo.memoryTypeIndex = findMemoryType(memRequirements.memoryTypeBits, properties);
 
-        if (vkAllocateMemory(device, &allocInfo, nullptr, &vertexBufferMemory) != VK_SUCCESS) {
-            throw std::runtime_error("failed to allocate vertex buffer memory!");
+        if (vkAllocateMemory(device, &allocInfo, nullptr, &bufferMemory) != VK_SUCCESS) {
+            throw std::runtime_error("failed to allocate buffer memory!");
         }
 
-        vkBindBufferMemory(device, vertexBuffer, vertexBufferMemory, 0);
+        vkBindBufferMemory(device, buffer, bufferMemory, 0);
+    }
+    void Rectangle::copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size) {
+        VkCommandBufferAllocateInfo allocInfo{};
+        allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+        allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+        allocInfo.commandPool = commandPool;
+        allocInfo.commandBufferCount = 1;
 
-        void* data;
-        vkMapMemory(device, vertexBufferMemory, 0, bufferInfo.size, 0, &data);
-            memcpy(data, vertices.data(), (size_t) bufferInfo.size);
-        vkUnmapMemory(device, vertexBufferMemory);
+        VkCommandBuffer commandBuffer;
+        vkAllocateCommandBuffers(device, &allocInfo, &commandBuffer);
+
+        VkCommandBufferBeginInfo beginInfo{};
+        beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+        beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+
+        vkBeginCommandBuffer(commandBuffer, &beginInfo);
+
+        VkBufferCopy copyRegion{};
+        copyRegion.size = size;
+        vkCmdCopyBuffer(commandBuffer, srcBuffer, dstBuffer, 1, &copyRegion);
+
+        vkEndCommandBuffer(commandBuffer);
+
+        VkSubmitInfo submitInfo{};
+        submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+        submitInfo.commandBufferCount = 1;
+        submitInfo.pCommandBuffers = &commandBuffer;
+
+        vkQueueSubmit(graphicsQueue, 1, &submitInfo, VK_NULL_HANDLE);
+        vkQueueWaitIdle(graphicsQueue);
+
+        vkFreeCommandBuffers(device, commandPool, 1, &commandBuffer);
     }
 
-     uint32_t Triangle::findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties) {
+     uint32_t Rectangle::findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties) {
         VkPhysicalDeviceMemoryProperties memProperties;
         vkGetPhysicalDeviceMemoryProperties(physicalDevice, &memProperties);
 
@@ -582,7 +658,7 @@ namespace rectangle{
 
         throw std::runtime_error("failed to find suitable memory type!");
     }
-    void Triangle::createCommandBuffers() {
+    void Rectangle::createCommandBuffers() {
         commandBuffers.resize(MAX_FRAMES_IN_FLIGHT);
 
         VkCommandBufferAllocateInfo allocInfo{};
@@ -596,7 +672,7 @@ namespace rectangle{
         }
     }
 
-     void Triangle::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex) {
+     void Rectangle::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex) {
         static int frame{};
 
         frame = (frame + 1) % 1000;
@@ -614,7 +690,7 @@ namespace rectangle{
         renderPassInfo.renderArea.offset = {0, 0};
         renderPassInfo.renderArea.extent = swapChainExtent;
 
-        VkClearValue clearColor = {{{0.0f, 0.0f, 0.0f, 1.0f}}};
+        VkClearValue clearColor = {{{0.5f, 0.1f, 0.3f, 1.0f}}};
         renderPassInfo.clearValueCount = 1;
         renderPassInfo.pClearValues = &clearColor;
 
@@ -641,35 +717,24 @@ namespace rectangle{
             VkDeviceSize offsets[] = {0};
             vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
 
-           
-
-
 
             int i{};
-
-            for (auto& obj : gameobjects)
+            for (auto& obj : gameObjects)
             {
-
                 obj.transform2D.rotation = glm::mod(obj.transform2D.rotation + 0.00001f * i, glm::two_pi<float>());
                 SimplePushConstantData push{};
                 push.offset = obj.transform2D.translation;
 
                 push.color = obj.color;
-                push.transform = obj.transform2D.mat2();
+                push.transform = obj.transform2D.matCalc();
 
                 i++;
 
-
-
-                
-
-                vkCmdPushConstants(commandBuffer,pipelineLayout,VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT , 
-                        0, sizeof(SimplePushConstantData), &push);
-         
-                
-
-                vkCmdDraw(commandBuffer, static_cast<uint32_t>(vertices.size()), 1, 0, 0);
-
+                vkCmdPushConstants(commandBuffer,pipelineLayout,VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT , 0, 
+                        sizeof(SimplePushConstantData), &push);
+                vkCmdBindIndexBuffer(commandBuffer, indexBuffer, 0, VK_INDEX_TYPE_UINT16);
+                vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(indices.size()), 1, 0, 0, 0);
+              // vkCmdDraw(commandBuffer, static_cast<uint32_t>(vertices.size()), 1, 0, 0);
 
             }
 
@@ -680,7 +745,7 @@ namespace rectangle{
             throw std::runtime_error("failed to record command buffer!");
         }
     }
-    void Triangle::createSyncObjects() {
+    void Rectangle::createSyncObjects() {
         imageAvailableSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
         renderFinishedSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
         inFlightFences.resize(MAX_FRAMES_IN_FLIGHT);
@@ -700,7 +765,7 @@ namespace rectangle{
             }
         }
     }
-    void Triangle::drawFrame() {
+    void Rectangle::drawFrame() {
         vkWaitForFences(device, 1, &inFlightFences[currentFrame], VK_TRUE, UINT64_MAX);
 
         uint32_t imageIndex;
@@ -762,7 +827,7 @@ namespace rectangle{
         currentFrame = (currentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
     }
 
-     VkShaderModule Triangle::createShaderModule(const std::vector<char>& code) {
+     VkShaderModule Rectangle::createShaderModule(const std::vector<char>& code) {
         VkShaderModuleCreateInfo createInfo{};
         createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
         createInfo.codeSize = code.size();
@@ -777,7 +842,7 @@ namespace rectangle{
     }
 
 
-     VkSurfaceFormatKHR Triangle::chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats) {
+     VkSurfaceFormatKHR Rectangle::chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats) {
         for (const auto& availableFormat : availableFormats) {
             if (availableFormat.format == VK_FORMAT_B8G8R8A8_SRGB && availableFormat.colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR) {
                 return availableFormat;
@@ -787,7 +852,7 @@ namespace rectangle{
         return availableFormats[0];
     }
 
-    VkPresentModeKHR Triangle::chooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes) {
+    VkPresentModeKHR Rectangle::chooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes) {
         for (const auto& availablePresentMode : availablePresentModes) {
             if (availablePresentMode == VK_PRESENT_MODE_MAILBOX_KHR) {
                 return availablePresentMode;
@@ -796,7 +861,7 @@ namespace rectangle{
 
         return VK_PRESENT_MODE_FIFO_KHR;
     }
-      VkExtent2D Triangle::chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities) {
+      VkExtent2D Rectangle::chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities) {
         if (capabilities.currentExtent.width != std::numeric_limits<uint32_t>::max()) {
             return capabilities.currentExtent;
         } else {
@@ -816,7 +881,7 @@ namespace rectangle{
     }
 
 
-    SwapChainSupportDetails Triangle::querySwapChainSupport(VkPhysicalDevice device) {
+    SwapChainSupportDetails Rectangle::querySwapChainSupport(VkPhysicalDevice device) {
         SwapChainSupportDetails details;
 
         vkGetPhysicalDeviceSurfaceCapabilitiesKHR(device, surface, &details.capabilities);
@@ -839,7 +904,7 @@ namespace rectangle{
 
         return details;
     }
-      bool Triangle::isDeviceSuitable(VkPhysicalDevice device) {
+      bool Rectangle::isDeviceSuitable(VkPhysicalDevice device) {
         QueueFamilyIndices indices = findQueueFamilies(device);
 
         bool extensionsSupported = checkDeviceExtensionSupport(device);
@@ -852,7 +917,7 @@ namespace rectangle{
 
         return indices.isComplete() && extensionsSupported && swapChainAdequate;
     }
-    bool Triangle::checkDeviceExtensionSupport(VkPhysicalDevice device) {
+    bool Rectangle::checkDeviceExtensionSupport(VkPhysicalDevice device) {
         uint32_t extensionCount;
         vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionCount, nullptr);
 
@@ -867,7 +932,7 @@ namespace rectangle{
 
         return requiredExtensions.empty();
     }
-     QueueFamilyIndices Triangle::findQueueFamilies(VkPhysicalDevice device) {
+     QueueFamilyIndices Rectangle::findQueueFamilies(VkPhysicalDevice device) {
         QueueFamilyIndices indices;
 
         uint32_t queueFamilyCount = 0;
@@ -899,7 +964,7 @@ namespace rectangle{
         return indices;
     }
 
-   std::vector<const char*> Triangle::getRequiredExtensions() {
+   std::vector<const char*> Rectangle::getRequiredExtensions() {
         uint32_t glfwExtensionCount = 0;
         const char** glfwExtensions;
         glfwExtensions = glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
@@ -913,7 +978,7 @@ namespace rectangle{
         return extensions;
     }
 
-    bool Triangle::checkValidationLayerSupport() {
+    bool Rectangle::checkValidationLayerSupport() {
         uint32_t layerCount;
         vkEnumerateInstanceLayerProperties(&layerCount, nullptr);
 
@@ -937,7 +1002,7 @@ namespace rectangle{
 
         return true;
     }
-    std::vector<char> Triangle::readFile(const std::string& filename) {
+    std::vector<char> Rectangle::readFile(const std::string& filename) {
         std::ifstream file(filename, std::ios::ate | std::ios::binary);
 
         if (!file.is_open()) {
@@ -955,16 +1020,16 @@ namespace rectangle{
         return buffer;
 
     }
-    VKAPI_ATTR VkBool32 VKAPI_CALL Triangle::debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity, VkDebugUtilsMessageTypeFlagsEXT messageType, const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData, void* pUserData) {
+    VKAPI_ATTR VkBool32 VKAPI_CALL Rectangle::debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity, VkDebugUtilsMessageTypeFlagsEXT messageType, const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData, void* pUserData) {
         std::cerr << "validation layer: " << pCallbackData->pMessage << std::endl;
 
         return VK_FALSE;
     }
 
 
-    void Triangle::loadGameObjects()
+    void Rectangle::loadGameObjects()
     {
-        std::vector<glm::vec3> colors{
+          std::vector<glm::vec3> colors{
           {1.f, .0f, .43f},
           {1.f, .87f, .73f},
           {1.f, 1.f, .73f},
@@ -972,20 +1037,16 @@ namespace rectangle{
           {.73, .88f, 1.f}  //
         };
         for (int i = 0; i < 40; i ++){
-            auto triangle = GameObject::createGameObjects();
-            triangle.color = colors[i % colors.size()];
+            auto rectangle  = GameObject::createGameObjects();
+            rectangle.color = colors[i % colors.size()];
 //            triangle.transform2D.translation.x = .2f;
-            triangle.transform2D.scale = glm::vec2(0.5f)+ i * 0.025f;
-            triangle.transform2D.rotation = i * glm::pi<float>() * 0.025f; 
-            gameobjects.push_back(std::move(triangle));
+            rectangle.transform2D.scale = glm::vec2(0.5f)+ i * 0.025f;
+            rectangle.transform2D.rotation = i * glm::pi<float>() * 0.025f;
+            gameObjects.push_back(std::move(rectangle));
 
 
         }
-
-
     }
-
-
 
 
 
