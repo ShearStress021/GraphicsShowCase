@@ -643,13 +643,13 @@ namespace triangle {
             for (int  j = 0; j < 4; j++)
             {
                 SimplePushConstantData push{};
-                push.offset = {-0.0f + j  , -0.4f + j * 0.25f};
+                push.offset = {-0.0f, -0.4f + j * 0.25f};
 
                 push.color = {0.f,0.f,0.2f + 0.2f * j};
 
                 vkCmdPushConstants(commandBuffer,pipelineLayout,VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT , 0, sizeof(SimplePushConstantData), &push);
-                
-                vkCmdDraw(commandBuffer, static_cast<uint32_t>(vertices.size()), 1, 0, 0);
+          //      vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(indices.size()), 1, 0, 0, 0);
+               vkCmdDraw(commandBuffer, static_cast<uint32_t>(vertices.size()), 1, 0, 0);
 
             }
 

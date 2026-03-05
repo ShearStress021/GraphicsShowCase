@@ -33,3 +33,5 @@ fi
 
 rm -rf shaders/shader.frag.spv
 rm -rf shaders/shader.vert.spv
+
+rm -rf build

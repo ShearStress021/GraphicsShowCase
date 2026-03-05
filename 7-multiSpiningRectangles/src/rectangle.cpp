@@ -1030,7 +1030,7 @@ namespace rectangle{
     void Rectangle::loadGameObjects()
     {
           std::vector<glm::vec3> colors{
-          {1.f, .0f, .43f},
+          {1.f, .0f, .0f},
           {1.f, .87f, .73f},
           {1.f, 1.f, .73f},
           {.73f, 1.f, .8f},
@@ -1041,7 +1041,15 @@ namespace rectangle{
             rectangle.color = colors[i % colors.size()];
 //            triangle.transform2D.translation.x = .2f;
             rectangle.transform2D.scale = glm::vec2(0.5f)+ i * 0.025f;
-            rectangle.transform2D.rotation = i * glm::pi<float>() * 0.025f;
+            if (i % 2 == 0)
+            {
+                rectangle.transform2D.rotation = i * glm::pi<float>() * 0.025f;
+            }
+            else 
+            {
+                rectangle.transform2D.rotation = i * glm::pi<float>() * -0.025f;
+
+            }
             gameObjects.push_back(std::move(rectangle));
 
 
