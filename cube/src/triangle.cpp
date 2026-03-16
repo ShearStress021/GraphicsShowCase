@@ -1,8 +1,7 @@
 #include "triangle.hpp"
-#include "gameobjects.hpp"
 
-namespace triangle {
-	Triangle::Triangle(int w, int h, std::string name) 
+namespace cube{
+	Cube::Cube(int w, int h, std::string name) 
 		:
 		width(w),
 		height(h),
@@ -11,12 +10,12 @@ namespace triangle {
 
 		}
 
-	Triangle::~Triangle()
+	Cube::~Cube()
 	{
         cleanup();
 
 	}
-	void Triangle::run()
+	void Cube::run()
 	{
         loadGameObjects();
 		initWindow();
@@ -24,7 +23,7 @@ namespace triangle {
         mainLoop();
 	}
 
-	void Triangle::initWindow()
+	void Cube::initWindow()
 	{
 		glfwInit();
 
@@ -34,11 +33,11 @@ namespace triangle {
         glfwSetWindowUserPointer(window, this);
         glfwSetFramebufferSizeCallback(window, framebufferResizeCallback);
 	}
-	void Triangle::framebufferResizeCallback(GLFWwindow* window, int width, int height) {
-        auto app = reinterpret_cast<Triangle*>(glfwGetWindowUserPointer(window));
+	void Cube::framebufferResizeCallback(GLFWwindow* window, int width, int height) {
+        auto app = reinterpret_cast<Cube*>(glfwGetWindowUserPointer(window));
         app->framebufferResized = true;
     }
-	void Triangle::initVulkan() {
+	void Cube::initVulkan() {
         createInstance();
         setupDebugMessenger();
         createSurface();
@@ -50,12 +49,12 @@ namespace triangle {
         createGraphicsPipeline();
         createFramebuffers();
         createCommandPool();
-        createVertexBuffer();
+        createVertexBuffer(vertices);
         createCommandBuffers();
         createSyncObjects();
     }
 
-    void Triangle::mainLoop() {
+    void Cube::mainLoop() {
         while (!glfwWindowShouldClose(window)) {
             glfwPollEvents();
             drawFrame();
@@ -64,7 +63,7 @@ namespace triangle {
         vkDeviceWaitIdle(device);
     }
 
-   void Triangle::cleanupSwapChain() {
+   void Cube::cleanupSwapChain() {
         for (auto framebuffer : swapChainFramebuffers) {
             vkDestroyFramebuffer(device, framebuffer, nullptr);
         }
@@ -76,7 +75,7 @@ namespace triangle {
         vkDestroySwapchainKHR(device, swapChain, nullptr);
     }
 
-   void Triangle::cleanup() {
+   void Cube::cleanup() {
         cleanupSwapChain();
 
         vkDestroyPipeline(device, graphicsPipeline, nullptr);
@@ -108,7 +107,7 @@ namespace triangle {
         glfwTerminate();
     }
 
-     void Triangle::recreateSwapChain() {
+     void Cube::recreateSwapChain() {
         int width = 0, height = 0;
         glfwGetFramebufferSize(window, &width, &height);
         while (width == 0 || height == 0) {
@@ -125,14 +124,14 @@ namespace triangle {
         createFramebuffers();
     }
     
-    void Triangle::createInstance() {
+    void Cube::createInstance() {
         if (enableValidationLayers && !checkValidationLayerSupport()) {
             throw std::runtime_error("validation layers requested, but not available!");
         }
 
         VkApplicationInfo appInfo{};
         appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
-        appInfo.pApplicationName = "Hello Triangle";
+        appInfo.pApplicationName = "Hello Cube";
         appInfo.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
         appInfo.pEngineName = "No Engine";
         appInfo.engineVersion = VK_MAKE_VERSION(1, 0, 0);
@@ -164,14 +163,14 @@ namespace triangle {
         }
     }
 
-     void Triangle::populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT& createInfo) {
+     void Cube::populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT& createInfo) {
         createInfo = {};
         createInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
         createInfo.messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
         createInfo.messageType = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
         createInfo.pfnUserCallback = debugCallback;
     }
-    void Triangle::setupDebugMessenger() {
+    void Cube::setupDebugMessenger() {
         if (!enableValidationLayers) return;
 
         VkDebugUtilsMessengerCreateInfoEXT createInfo;
@@ -181,14 +180,14 @@ namespace triangle {
             throw std::runtime_error("failed to set up debug messenger!");
         }
     }
-   void Triangle::createSurface() {
+   void Cube::createSurface() {
         if (glfwCreateWindowSurface(instance, window, nullptr, &surface) != VK_SUCCESS) {
             throw std::runtime_error("failed to create window surface!");
         }
     }
 
 
-    void Triangle::pickPhysicalDevice() {
+    void Cube::pickPhysicalDevice() {
         uint32_t deviceCount = 0;
         vkEnumeratePhysicalDevices(instance, &deviceCount, nullptr);
 
@@ -211,7 +210,7 @@ namespace triangle {
         }
     }
 
-    void Triangle::createLogicalDevice() {
+    void Cube::createLogicalDevice() {
         QueueFamilyIndices indices = findQueueFamilies(physicalDevice);
 
         std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
@@ -254,7 +253,7 @@ namespace triangle {
         vkGetDeviceQueue(device, indices.graphicsFamily.value(), 0, &graphicsQueue);
         vkGetDeviceQueue(device, indices.presentFamily.value(), 0, &presentQueue);
     }
-    void Triangle::createSwapChain() {
+    void Cube::createSwapChain() {
         SwapChainSupportDetails swapChainSupport = querySwapChainSupport(physicalDevice);
 
         VkSurfaceFormatKHR surfaceFormat = chooseSwapSurfaceFormat(swapChainSupport.formats);
@@ -304,7 +303,7 @@ namespace triangle {
         swapChainImageFormat = surfaceFormat.format;
         swapChainExtent = extent;
     }
-    void Triangle::createImageViews() {
+    void Cube::createImageViews() {
         swapChainImageViews.resize(swapChainImages.size());
 
         for (size_t i = 0; i < swapChainImages.size(); i++) {
@@ -328,7 +327,7 @@ namespace triangle {
             }
         }
     }
-    void Triangle::createRenderPass() {
+    void Cube::createRenderPass() {
         VkAttachmentDescription colorAttachment{};
         colorAttachment.format = swapChainImageFormat;
         colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
@@ -369,7 +368,7 @@ namespace triangle {
             throw std::runtime_error("failed to create render pass!");
         }
     }
-    void Triangle::createGraphicsPipeline() {
+    void Cube::createGraphicsPipeline() {
         auto vertShaderCode = readFile("shaders/shader.vert.spv");
         auto fragShaderCode = readFile("shaders/shader.frag.spv");
 
@@ -394,15 +393,15 @@ namespace triangle {
         vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
 
 
-        VkVertexInputBindingDescription bindingDescription{};
-		bindingDescription.binding = 0;
-		bindingDescription.stride = sizeof(Vertex);
-		bindingDescription.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
+        std::vector<VkVertexInputBindingDescription> bindingDescription{1};
+		bindingDescription[0].binding = 0;
+		bindingDescription[0].stride = sizeof(Vertex);
+		bindingDescription[0].inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
 
        	std::array<VkVertexInputAttributeDescription, 2> attributeDescriptions{};
 		attributeDescriptions[0].binding = 0;
 		attributeDescriptions[0].location = 0;
-		attributeDescriptions[0].format =VK_FORMAT_R32G32_SFLOAT;
+		attributeDescriptions[0].format =VK_FORMAT_R32G32B32_SFLOAT;
 		attributeDescriptions[0].offset = offsetof(Vertex, pos);
 
 		attributeDescriptions[1].binding = 0;
@@ -412,7 +411,7 @@ namespace triangle {
 
         vertexInputInfo.vertexBindingDescriptionCount = 1;
         vertexInputInfo.vertexAttributeDescriptionCount = static_cast<uint32_t>(attributeDescriptions.size());
-        vertexInputInfo.pVertexBindingDescriptions = &bindingDescription;
+        vertexInputInfo.pVertexBindingDescriptions = bindingDescription.data();
         vertexInputInfo.pVertexAttributeDescriptions = attributeDescriptions.data();
 
         VkPipelineInputAssemblyStateCreateInfo inputAssembly{};
@@ -457,6 +456,14 @@ namespace triangle {
         colorBlending.blendConstants[2] = 0.0f;
         colorBlending.blendConstants[3] = 0.0f;
 
+        VkPipelineDepthStencilStateCreateInfo depthStencil{};
+        depthStencil.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
+        depthStencil.depthTestEnable = VK_TRUE;
+        depthStencil.depthWriteEnable = VK_TRUE;
+        depthStencil.depthCompareOp = VK_COMPARE_OP_LESS;
+        depthStencil.depthBoundsTestEnable = VK_FALSE;
+        depthStencil.stencilTestEnable = VK_FALSE;
+
         std::vector<VkDynamicState> dynamicStates = {
             VK_DYNAMIC_STATE_VIEWPORT,
             VK_DYNAMIC_STATE_SCISSOR
@@ -494,6 +501,7 @@ namespace triangle {
         pipelineInfo.pRasterizationState = &rasterizer;
         pipelineInfo.pMultisampleState = &multisampling;
         pipelineInfo.pColorBlendState = &colorBlending;
+        pipelineInfo.pDepthStencilState = &depthStencil;
         pipelineInfo.pDynamicState = &dynamicState;
         pipelineInfo.layout = pipelineLayout;
         pipelineInfo.renderPass = renderPass;
@@ -507,7 +515,7 @@ namespace triangle {
         vkDestroyShaderModule(device, fragShaderModule, nullptr);
         vkDestroyShaderModule(device, vertShaderModule, nullptr);
     }
-    void Triangle::createFramebuffers() {
+    void Cube::createFramebuffers() {
         swapChainFramebuffers.resize(swapChainImageViews.size());
 
         for (size_t i = 0; i < swapChainImageViews.size(); i++) {
@@ -529,7 +537,7 @@ namespace triangle {
             }
         }
     }
-    void Triangle::createCommandPool() {
+    void Cube::createCommandPool() {
         QueueFamilyIndices queueFamilyIndices = findQueueFamilies(physicalDevice);
 
         VkCommandPoolCreateInfo poolInfo{};
@@ -542,10 +550,12 @@ namespace triangle {
         }
     }
 
-     void Triangle::createVertexBuffer() {
+     void Cube::createVertexBuffer(std::vector<Vertex> &vertices) {
         VkBufferCreateInfo bufferInfo{};
         bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-        bufferInfo.size = sizeof(vertices[0]) * vertices.size(); bufferInfo.usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT; bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+        bufferInfo.size = sizeof(vertices[0]) * vertices.size(); 
+        bufferInfo.usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT; 
+        bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
         if (vkCreateBuffer(device, &bufferInfo, nullptr, &vertexBuffer) != VK_SUCCESS) {
             throw std::runtime_error("failed to create vertex buffer!");
         }
@@ -570,7 +580,7 @@ namespace triangle {
         vkUnmapMemory(device, vertexBufferMemory);
     }
 
-     uint32_t Triangle::findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties) {
+     uint32_t Cube::findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties) {
         VkPhysicalDeviceMemoryProperties memProperties;
         vkGetPhysicalDeviceMemoryProperties(physicalDevice, &memProperties);
 
@@ -582,9 +592,10 @@ namespace triangle {
 
         throw std::runtime_error("failed to find suitable memory type!");
     }
-    void Triangle::createCommandBuffers() {
+    void Cube::createCommandBuffers() {
         commandBuffers.resize(MAX_FRAMES_IN_FLIGHT);
 
+        
         VkCommandBufferAllocateInfo allocInfo{};
         allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
         allocInfo.commandPool = commandPool;
@@ -596,7 +607,7 @@ namespace triangle {
         }
     }
 
-     void Triangle::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex) {
+     void Cube::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex) {
         static int frame{};
 
         frame = (frame + 1) % 1000;
@@ -614,7 +625,7 @@ namespace triangle {
         renderPassInfo.renderArea.offset = {0, 0};
         renderPassInfo.renderArea.extent = swapChainExtent;
 
-        VkClearValue clearColor = {{{0.0f, 0.0f, 0.0f, 1.0f}}};
+        VkClearValue clearColor = {{{0.5f, 0.1f, 0.3f, 1.0f}}};
         renderPassInfo.clearValueCount = 1;
         renderPassInfo.pClearValues = &clearColor;
 
@@ -641,35 +652,27 @@ namespace triangle {
             VkDeviceSize offsets[] = {0};
             vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
 
-           
-
+            //std::cout << gameobjects.size() << "\n";
 
 
             int i{};
-
-            for (auto& obj : gameobjects)
+            for (auto &obj: gameobjects)
             {
-
-                obj.transform2D.rotation = glm::mod(obj.transform2D.rotation + 0.000001f * i, glm::two_pi<float>());
+                obj.transformCom.rotation.y = glm::mod(obj.transformCom.rotation.y + 0.01f * i, glm::two_pi<float>());
+                obj.transformCom.rotation.x = glm::mod(obj.transformCom.rotation.x + 0.01f * i, glm::two_pi<float>());
                 SimplePushConstantData push{};
-                push.offset = obj.transform2D.translation;
+              //  push.offset = obj.transform2D.translation;
 
                 push.color = obj.color;
-                push.transform = obj.transform2D.mat2();
+                push.transform = obj.transformCom.mat4Calc();
 
                 i++;
 
 
-
-                
-
                 vkCmdPushConstants(commandBuffer,pipelineLayout,VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT , 
                         0, sizeof(SimplePushConstantData), &push);
-         
-                
-
-                vkCmdDraw(commandBuffer, static_cast<uint32_t>(vertices.size()), 1, 0, 0);
-
+          //      vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(indices.size()), 1, 0, 0, 0);
+               vkCmdDraw(commandBuffer, static_cast<uint32_t>(vertices.size()), 1, 0, 0);
 
             }
 
@@ -680,7 +683,7 @@ namespace triangle {
             throw std::runtime_error("failed to record command buffer!");
         }
     }
-    void Triangle::createSyncObjects() {
+    void Cube::createSyncObjects() {
         imageAvailableSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
         renderFinishedSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
         inFlightFences.resize(MAX_FRAMES_IN_FLIGHT);
@@ -700,7 +703,7 @@ namespace triangle {
             }
         }
     }
-    void Triangle::drawFrame() {
+    void Cube::drawFrame() {
         vkWaitForFences(device, 1, &inFlightFences[currentFrame], VK_TRUE, UINT64_MAX);
 
         uint32_t imageIndex;
@@ -762,7 +765,7 @@ namespace triangle {
         currentFrame = (currentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
     }
 
-     VkShaderModule Triangle::createShaderModule(const std::vector<char>& code) {
+     VkShaderModule Cube::createShaderModule(const std::vector<char>& code) {
         VkShaderModuleCreateInfo createInfo{};
         createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
         createInfo.codeSize = code.size();
@@ -777,7 +780,7 @@ namespace triangle {
     }
 
 
-     VkSurfaceFormatKHR Triangle::chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats) {
+     VkSurfaceFormatKHR Cube::chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats) {
         for (const auto& availableFormat : availableFormats) {
             if (availableFormat.format == VK_FORMAT_B8G8R8A8_SRGB && availableFormat.colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR) {
                 return availableFormat;
@@ -787,7 +790,7 @@ namespace triangle {
         return availableFormats[0];
     }
 
-    VkPresentModeKHR Triangle::chooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes) {
+    VkPresentModeKHR Cube::chooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes) {
         for (const auto& availablePresentMode : availablePresentModes) {
             if (availablePresentMode == VK_PRESENT_MODE_MAILBOX_KHR) {
                 return availablePresentMode;
@@ -796,7 +799,7 @@ namespace triangle {
 
         return VK_PRESENT_MODE_FIFO_KHR;
     }
-      VkExtent2D Triangle::chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities) {
+      VkExtent2D Cube::chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities) {
         if (capabilities.currentExtent.width != std::numeric_limits<uint32_t>::max()) {
             return capabilities.currentExtent;
         } else {
@@ -816,7 +819,7 @@ namespace triangle {
     }
 
 
-    SwapChainSupportDetails Triangle::querySwapChainSupport(VkPhysicalDevice device) {
+    SwapChainSupportDetails Cube::querySwapChainSupport(VkPhysicalDevice device) {
         SwapChainSupportDetails details;
 
         vkGetPhysicalDeviceSurfaceCapabilitiesKHR(device, surface, &details.capabilities);
@@ -839,7 +842,7 @@ namespace triangle {
 
         return details;
     }
-      bool Triangle::isDeviceSuitable(VkPhysicalDevice device) {
+      bool Cube::isDeviceSuitable(VkPhysicalDevice device) {
         QueueFamilyIndices indices = findQueueFamilies(device);
 
         bool extensionsSupported = checkDeviceExtensionSupport(device);
@@ -852,7 +855,7 @@ namespace triangle {
 
         return indices.isComplete() && extensionsSupported && swapChainAdequate;
     }
-    bool Triangle::checkDeviceExtensionSupport(VkPhysicalDevice device) {
+    bool Cube::checkDeviceExtensionSupport(VkPhysicalDevice device) {
         uint32_t extensionCount;
         vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionCount, nullptr);
 
@@ -867,7 +870,7 @@ namespace triangle {
 
         return requiredExtensions.empty();
     }
-     QueueFamilyIndices Triangle::findQueueFamilies(VkPhysicalDevice device) {
+     QueueFamilyIndices Cube::findQueueFamilies(VkPhysicalDevice device) {
         QueueFamilyIndices indices;
 
         uint32_t queueFamilyCount = 0;
@@ -899,7 +902,7 @@ namespace triangle {
         return indices;
     }
 
-   std::vector<const char*> Triangle::getRequiredExtensions() {
+   std::vector<const char*> Cube::getRequiredExtensions() {
         uint32_t glfwExtensionCount = 0;
         const char** glfwExtensions;
         glfwExtensions = glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
@@ -913,7 +916,7 @@ namespace triangle {
         return extensions;
     }
 
-    bool Triangle::checkValidationLayerSupport() {
+    bool Cube::checkValidationLayerSupport() {
         uint32_t layerCount;
         vkEnumerateInstanceLayerProperties(&layerCount, nullptr);
 
@@ -937,7 +940,7 @@ namespace triangle {
 
         return true;
     }
-    std::vector<char> Triangle::readFile(const std::string& filename) {
+    std::vector<char> Cube::readFile(const std::string& filename) {
         std::ifstream file(filename, std::ios::ate | std::ios::binary);
 
         if (!file.is_open()) {
@@ -955,15 +958,74 @@ namespace triangle {
         return buffer;
 
     }
-    VKAPI_ATTR VkBool32 VKAPI_CALL Triangle::debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity, VkDebugUtilsMessageTypeFlagsEXT messageType, const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData, void* pUserData) {
+    VKAPI_ATTR VkBool32 VKAPI_CALL Cube::debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity, VkDebugUtilsMessageTypeFlagsEXT messageType, const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData, void* pUserData) {
         std::cerr << "validation layer: " << pCallbackData->pMessage << std::endl;
 
         return VK_FALSE;
     }
 
-
-    void Triangle::loadGameObjects()
+    void Cube::loadGameObjects()
     {
+        std::vector<Vertex> vert = {
+              // left face (white)
+      {{-.5f, -.5f, -.5f}, {.9f, .9f, .9f}},
+      {{-.5f, .5f, .5f}, {.9f, .9f, .9f}},
+      {{-.5f, -.5f, .5f}, {.9f, .9f, .9f}},
+      {{-.5f, -.5f, -.5f}, {.9f, .9f, .9f}},
+      {{-.5f, .5f, -.5f}, {.9f, .9f, .9f}},
+      {{-.5f, .5f, .5f}, {.9f, .9f, .9f}},
+
+      // right face (yellow)
+      {{.5f, -.5f, -.5f}, {.8f, .8f, .1f}},
+      {{.5f, .5f, .5f}, {.8f, .8f, .1f}},
+      {{.5f, -.5f, .5f}, {.8f, .8f, .1f}},
+      {{.5f, -.5f, -.5f}, {.8f, .8f, .1f}},
+      {{.5f, .5f, -.5f}, {.8f, .8f, .1f}},
+      {{.5f, .5f, .5f}, {.8f, .8f, .1f}},
+
+      // top face (orange, remember y axis points down)
+      {{-.5f, -.5f, -.5f}, {.9f, .6f, .1f}},
+      {{.5f, -.5f, .5f}, {.9f, .6f, .1f}},
+      {{-.5f, -.5f, .5f}, {.9f, .6f, .1f}},
+      {{-.5f, -.5f, -.5f}, {.9f, .6f, .1f}},
+      {{.5f, -.5f, -.5f}, {.9f, .6f, .1f}},
+      {{.5f, -.5f, .5f}, {.9f, .6f, .1f}},
+
+      // bottom face (red)
+      {{-.5f, .5f, -.5f}, {.8f, .1f, .1f}},
+      {{.5f, .5f, .5f}, {.8f, .1f, .1f}},
+      {{-.5f, .5f, .5f}, {.8f, .1f, .1f}},
+      {{-.5f, .5f, -.5f}, {.8f, .1f, .1f}},
+      {{.5f, .5f, -.5f}, {.8f, .1f, .1f}},
+      {{.5f, .5f, .5f}, {.8f, .1f, .1f}},
+
+      // nose face (blue)
+      {{-.5f, -.5f, 0.5f}, {.1f, .1f, .8f}},
+      {{.5f, .5f, 0.5f}, {.1f, .1f, .8f}},
+      {{-.5f, .5f, 0.5f}, {.1f, .1f, .8f}},
+      {{-.5f, -.5f, 0.5f}, {.1f, .1f, .8f}},
+      {{.5f, -.5f, 0.5f}, {.1f, .1f, .8f}},
+      {{.5f, .5f, 0.5f}, {.1f, .1f, .8f}},
+
+      // tail face (green)
+      {{-.5f, -.5f, -0.5f}, {.1f, .8f, .1f}},
+      {{.5f, .5f, -0.5f}, {.1f, .8f, .1f}},
+      {{-.5f, .5f, -0.5f}, {.1f, .8f, .1f}},
+      {{-.5f, -.5f, -0.5f}, {.1f, .8f, .1f}},
+      {{.5f, -.5f, -0.5f}, {.1f, .8f, .1f}},
+      {{.5f, .5f, -0.5f}, {.1f, .8f, .1f}},
+
+    };
+
+        for (auto &v : vert)
+        {
+            vertices.push_back(v);
+
+        }
+
+
+
+
         std::vector<glm::vec3> colors{
           {1.f, .0f, .43f},
           {1.f, .87f, .73f},
@@ -971,30 +1033,12 @@ namespace triangle {
           {.73f, 1.f, .8f},
           {.73, .88f, 1.f}  //
         };
-        for (int i = 0; i < 40; i ++){
-            auto triangle = GameObject::createGameObjects();
-            triangle.color = colors[i % colors.size()];
-            //triangle.transform2D.translation = {-0.5f, 0.5f};
-            triangle.transform2D.scale = glm::vec2(0.5f)+ i * 0.025f;
-            if (i % 2 == 0)
-            {
-            triangle.transform2D.rotation = i * glm::pi<float>() * 0.025f; 
 
-            }
-            else {
-            triangle.transform2D.rotation = -i * glm::pi<float>() * 0.025f; 
-
-
-            }
-            gameobjects.push_back(std::move(triangle));
-
-
-        }
-
-
+        auto cube = GameObject::createGameObjects();
+        cube.transformCom.translation = {0.f, 0.f, 0.5f};
+        cube.transformCom.scale = {0.5f, 0.5f, 0.5f};
+        gameobjects.push_back(std::move(cube));
     }
-
-
 
 
 

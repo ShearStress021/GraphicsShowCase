@@ -1,5 +1,4 @@
 #include "triangle.hpp"
-#include "gameobjects.hpp"
 
 namespace triangle {
 	Triangle::Triangle(int w, int h, std::string name) 
@@ -50,7 +49,7 @@ namespace triangle {
         createGraphicsPipeline();
         createFramebuffers();
         createCommandPool();
-        createVertexBuffer();
+        createVertexBuffer(vertices);
         createCommandBuffers();
         createSyncObjects();
     }
@@ -542,7 +541,7 @@ namespace triangle {
         }
     }
 
-     void Triangle::createVertexBuffer() {
+     void Triangle::createVertexBuffer(std::vector<Vertex> &vertices) {
         VkBufferCreateInfo bufferInfo{};
         bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
         bufferInfo.size = sizeof(vertices[0]) * vertices.size(); bufferInfo.usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT; bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
@@ -641,16 +640,14 @@ namespace triangle {
             VkDeviceSize offsets[] = {0};
             vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
 
-           
-
+//            std::cout << gameobjects.size() << "\n";
 
 
             int i{};
-
-            for (auto& obj : gameobjects)
+            for (auto &obj: gameobjects)
             {
+                obj.transform2D.rotation = glm::mod(obj.transform2D.rotation + 0.00001f * i, glm::two_pi<float>());
 
-                obj.transform2D.rotation = glm::mod(obj.transform2D.rotation + 0.000001f * i, glm::two_pi<float>());
                 SimplePushConstantData push{};
                 push.offset = obj.transform2D.translation;
 
@@ -660,16 +657,10 @@ namespace triangle {
                 i++;
 
 
-
-                
-
                 vkCmdPushConstants(commandBuffer,pipelineLayout,VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT , 
                         0, sizeof(SimplePushConstantData), &push);
-         
-                
-
-                vkCmdDraw(commandBuffer, static_cast<uint32_t>(vertices.size()), 1, 0, 0);
-
+          //      vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(indices.size()), 1, 0, 0, 0);
+               vkCmdDraw(commandBuffer, static_cast<uint32_t>(vertices.size()), 1, 0, 0);
 
             }
 
@@ -961,36 +952,100 @@ namespace triangle {
         return VK_FALSE;
     }
 
-
     void Triangle::loadGameObjects()
     {
-        std::vector<glm::vec3> colors{
+        std::vector<Vertex> vert = {
+            {{-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}},
+            {{0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}},
+            {{0.5f, 0.5f}, {1.0f, 0.0f, 1.0f}},
+
+            {{-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}},
+            {{0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}},
+            {{-0.5f, 0.5f}, {1.0f, 0.0f, 1.0f}}
+
+        };
+
+        for (auto &v : vert)
+        {
+          //  vertices.push_back(v);
+
+        }
+
+        unsigned int points {40};
+        float radius = 1.0f;   // bigger circle
+
+        Vertex center{{0.0f, 0.0f}};
+        glm::vec3 centerColor{1.f, 1.f, 1.f}; // white center
+        std::vector<glm::vec3> colors{};
+                                              //
+
+        for (int i = 0; i < points; i++) {
+
+            float angle1 = i * glm::two_pi<float>() / points;
+            float angle2 = (i + 1) * glm::two_pi<float>() / points;
+
+            glm::vec3 edgeColor1{0.f, 0.f, 1.f};  // blue
+            glm::vec3 edgeColor2{0.f, 1.f, 1.f};  // cyan
+
+            Vertex center{{0.0f, 0.0f}, centerColor};
+
+            colors.push_back({generateRandom(), generateRandom(), generateRandom()});
+
+            Vertex v1{{radius * cos(angle1), radius * sin(angle1)}, edgeColor1};
+            Vertex v2{{radius * cos(angle2), radius  * sin(angle2)}, edgeColor2};
+
+
+            vertices.push_back(center);
+            vertices.push_back(v1);
+            vertices.push_back(v2);
+        }
+
+
+
+            
+        std::vector<glm::vec3> color{
           {1.f, .0f, .43f},
           {1.f, .87f, .73f},
           {1.f, 1.f, .73f},
           {.73f, 1.f, .8f},
           {.73, .88f, 1.f}  //
         };
-        for (int i = 0; i < 40; i ++){
-            auto triangle = GameObject::createGameObjects();
-            triangle.color = colors[i % colors.size()];
-            //triangle.transform2D.translation = {-0.5f, 0.5f};
-            triangle.transform2D.scale = glm::vec2(0.5f)+ i * 0.025f;
-            if (i % 2 == 0)
-            {
-            triangle.transform2D.rotation = i * glm::pi<float>() * 0.025f; 
-
-            }
-            else {
-            triangle.transform2D.rotation = -i * glm::pi<float>() * 0.025f; 
 
 
-            }
-            gameobjects.push_back(std::move(triangle));
+        const unsigned int circleNum {4};
 
+        for (int i = 0; i < circleNum; i++)
+
+        {
+
+            //std::cout << colors[i].r << " " << colors[i].b  << " "<< colors[i].g << '\n';
+            float scaler = i / (float)circleNum;
+            auto circle = GameObject::createGameObjects();
+            circle.color = colors[i ];
+            circle.transform2D.translation = {.0f, 0.f};
+            std::cout << glm::to_string(glm::vec2(0.01f)) << '\n';
+            circle.transform2D.rotation = i * glm::pi<float>() * 0.025f; 
+            circle.transform2D.scale = glm::vec2(0.1f * (circleNum - i), 0.13f * (circleNum - i));
+            gameobjects.push_back(std::move(circle));
 
         }
 
+        
+
+
+    }
+
+    float Triangle::generateRandom()
+    {
+            std::random_device rd;                        // seed
+            std::mt19937 gen(rd());                       // mersenne twister engine
+
+            std::uniform_real_distribution<float> dis(0.0f, 1.0f);
+
+            float randomNumber = dis(gen);
+
+
+           return randomNumber ;
 
     }
 

@@ -2,27 +2,26 @@
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
 #include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
 
 
-
-namespace cube{
+namespace triangle {
 
 
 	struct TransformComponent{
-		glm::vec3 translation{};
-		glm::vec3 scale{1.f, 1.f, 1.f};
-		glm::vec3 rotation{};
+		glm::vec2 translation{};
+		glm::vec2 scale{1.f, 1.f};
+		float rotation{};
 
-		glm::mat4 mat4Calc() {
-			auto tranform = glm::translate(glm::mat4{1.f}, translation);
+		glm::mat2 mat2() {
 
-			tranform = glm::rotate(tranform, rotation.y, {0.f, 1.f, 0.f});
-			tranform = glm::rotate(tranform, rotation.x, {1.f, 0.f, 0.f});
-			tranform = glm::rotate(tranform, rotation.z, {0.f, 0.f, 1.f});
+			const float s{glm::sin(rotation)};
+			const float c{glm::cos(rotation)};
 
-			tranform = glm::scale(tranform, scale);
-			return tranform;
+			glm::mat2 rotMatrix{{c, s}, {-s, c}};
+
+			glm::mat2 scaleMat{{scale.x, 0.f}, {0.f, scale.y}};
+//			return scaleMat * rotMatrix;
+			return rotMatrix * scaleMat;
 		}
 
 	};
@@ -43,7 +42,7 @@ namespace cube{
 			
 			glm::vec3 color{};
 
-			TransformComponent transformCom{};
+			TransformComponent transform2D{};
 
 
 			GameObject(const GameObject& ) = delete;

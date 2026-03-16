@@ -8,7 +8,7 @@
 int main()
 {
 	
-	cube::Cube app{WIDTH,HEIGHT, "My Cube 3d"};
+	triangle::Triangle app{WIDTH,HEIGHT, "My Triangle"};
 
 	try {
         app.run();

@@ -1,5 +1,4 @@
 #include "triangle.hpp"
-#include "gameobjects.hpp"
 
 namespace triangle {
 	Triangle::Triangle(int w, int h, std::string name) 
@@ -50,7 +49,7 @@ namespace triangle {
         createGraphicsPipeline();
         createFramebuffers();
         createCommandPool();
-        createVertexBuffer();
+        createVertexBuffer(vertices);
         createCommandBuffers();
         createSyncObjects();
     }
@@ -542,7 +541,7 @@ namespace triangle {
         }
     }
 
-     void Triangle::createVertexBuffer() {
+     void Triangle::createVertexBuffer(std::vector<Vertex> &vertices) {
         VkBufferCreateInfo bufferInfo{};
         bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
         bufferInfo.size = sizeof(vertices[0]) * vertices.size(); bufferInfo.usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT; bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
@@ -614,7 +613,7 @@ namespace triangle {
         renderPassInfo.renderArea.offset = {0, 0};
         renderPassInfo.renderArea.extent = swapChainExtent;
 
-        VkClearValue clearColor = {{{0.0f, 0.0f, 0.0f, 1.0f}}};
+        VkClearValue clearColor = {{{0.5f, 0.1f, 0.3f, 1.0f}}};
         renderPassInfo.clearValueCount = 1;
         renderPassInfo.pClearValues = &clearColor;
 
@@ -641,16 +640,12 @@ namespace triangle {
             VkDeviceSize offsets[] = {0};
             vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
 
-           
-
 
 
             int i{};
-
-            for (auto& obj : gameobjects)
+            for (auto &obj: gameobjects)
             {
-
-                obj.transform2D.rotation = glm::mod(obj.transform2D.rotation + 0.000001f * i, glm::two_pi<float>());
+               // obj.transform2D.rotation = glm::mod(obj.transform2D.rotation + 0.00001f * i, glm::two_pi<float>());
                 SimplePushConstantData push{};
                 push.offset = obj.transform2D.translation;
 
@@ -660,16 +655,10 @@ namespace triangle {
                 i++;
 
 
-
-                
-
                 vkCmdPushConstants(commandBuffer,pipelineLayout,VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT , 
                         0, sizeof(SimplePushConstantData), &push);
-         
-                
-
-                vkCmdDraw(commandBuffer, static_cast<uint32_t>(vertices.size()), 1, 0, 0);
-
+          //      vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(indices.size()), 1, 0, 0, 0);
+               vkCmdDraw(commandBuffer, static_cast<uint32_t>(vertices.size()), 1, 0, 0);
 
             }
 
@@ -961,9 +950,25 @@ namespace triangle {
         return VK_FALSE;
     }
 
-
     void Triangle::loadGameObjects()
     {
+        std::vector<Vertex> vert = {
+            {{-1.0f, -1.0f}, {1.0f, 0.0f, 0.0f}},
+            {{1.0f, -1.0f}, {0.0f, 1.0f, 0.0f}},
+            {{1.0f, 1.0f}, {1.0f, 0.0f, 1.0f}},
+
+            {{-1.0f, -1.0f}, {1.0f, 0.0f, 0.0f}},
+            {{1.0f, 1.0f}, {0.0f, 1.0f, 0.0f}},
+            {{-1.0f, 1.0f}, {1.0f, 0.0f, 1.0f}}
+
+        };
+
+        for (auto &v : vert)
+        {
+            vertices.push_back(v);
+
+        }
+
         std::vector<glm::vec3> colors{
           {1.f, .0f, .43f},
           {1.f, .87f, .73f},
@@ -971,25 +976,12 @@ namespace triangle {
           {.73f, 1.f, .8f},
           {.73, .88f, 1.f}  //
         };
-        for (int i = 0; i < 40; i ++){
-            auto triangle = GameObject::createGameObjects();
-            triangle.color = colors[i % colors.size()];
-            //triangle.transform2D.translation = {-0.5f, 0.5f};
-            triangle.transform2D.scale = glm::vec2(0.5f)+ i * 0.025f;
-            if (i % 2 == 0)
-            {
-            triangle.transform2D.rotation = i * glm::pi<float>() * 0.025f; 
-
-            }
-            else {
-            triangle.transform2D.rotation = -i * glm::pi<float>() * 0.025f; 
-
-
-            }
-            gameobjects.push_back(std::move(triangle));
-
-
-        }
+        auto triangle = GameObject::createGameObjects();
+        triangle.color = {0.f, 1.f, 0.f};
+//            triangle.transform2D.translation.x = .2f;
+        triangle.transform2D.scale = glm::vec2(1.0f) ;
+       // triangle.transform2D.rotation = i * glm::pi<float>() * 0.025f;
+        gameobjects.push_back(std::move(triangle));
 
 
     }
