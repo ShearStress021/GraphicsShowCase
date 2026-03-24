@@ -1,4 +1,5 @@
-#include "triangle.hpp"
+#include "renderer.hpp"
+#include "window.hpp"
 #include <iostream>
 
 
@@ -7,8 +8,10 @@
 
 int main()
 {
-	
-	cube::Cube app{WIDTH,HEIGHT, "My Cube 3d"};
+    
+    cube::Window window{WIDTH, HEIGHT, "My Cube"};
+
+	cube::Cube app{window};
 
 	try {
         app.run();
