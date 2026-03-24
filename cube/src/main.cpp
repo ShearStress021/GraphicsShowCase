@@ -1,4 +1,4 @@
-#include "renderer.hpp"
+#include "pipeline.hpp"
 #include "window.hpp"
 #include <iostream>
 
