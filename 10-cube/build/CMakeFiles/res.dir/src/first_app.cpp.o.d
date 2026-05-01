@@ -384,6 +384,30 @@ CMakeFiles/res.dir/src/first_app.cpp.o: \
  /usr/include/c++/14/pstl/execution_defs.h \
  /home/kanja/projects/GraphicsShowCase/10-cube/src/cube_renderer.hpp \
  /home/kanja/projects/GraphicsShowCase/10-cube/src/cube_swap_chain.hpp \
+ /home/kanja/projects/GraphicsShowCase/10-cube/src/cube_camera.hpp \
+ /home/kanja/projects/GraphicsShowCase/10-cube/src/command_input.hpp \
  /home/kanja/projects/GraphicsShowCase/10-cube/src/simple_render_system.hpp \
  /home/kanja/projects/GraphicsShowCase/10-cube/src/cube_pipeline.hpp \
- /usr/include/c++/14/array
+ /usr/include/c++/14/chrono /usr/include/c++/14/bits/chrono.h \
+ /usr/include/c++/14/ratio /usr/include/c++/14/ctime \
+ /usr/include/c++/14/bits/parse_numbers.h /usr/include/c++/14/sstream \
+ /usr/include/c++/14/istream /usr/include/c++/14/bits/istream.tcc \
+ /usr/include/c++/14/bits/sstream.tcc /usr/include/c++/14/bits/stl_algo.h \
+ /usr/include/c++/14/bits/algorithmfwd.h \
+ /usr/include/c++/14/bits/stl_heap.h \
+ /usr/include/c++/14/bits/uniform_int_dist.h \
+ /usr/include/c++/14/bits/chrono_io.h /usr/include/c++/14/iomanip \
+ /usr/include/c++/14/locale \
+ /usr/include/c++/14/bits/locale_facets_nonio.h \
+ /usr/include/x86_64-linux-gnu/c++/14/bits/time_members.h \
+ /usr/include/x86_64-linux-gnu/c++/14/bits/messages_members.h \
+ /usr/include/libintl.h /usr/include/c++/14/bits/codecvt.h \
+ /usr/include/c++/14/bits/locale_facets_nonio.tcc \
+ /usr/include/c++/14/bits/locale_conv.h \
+ /usr/include/c++/14/bits/quoted_string.h /usr/include/c++/14/format \
+ /usr/include/c++/14/array /usr/include/c++/14/charconv \
+ /usr/include/c++/14/optional \
+ /usr/include/c++/14/bits/enable_special_members.h \
+ /usr/include/c++/14/span /usr/include/c++/14/variant \
+ /usr/include/c++/14/bits/unicode.h \
+ /usr/include/c++/14/bits/unicode-data.h

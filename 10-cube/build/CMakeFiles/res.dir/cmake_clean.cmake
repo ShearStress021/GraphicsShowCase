@@ -1,5 +1,9 @@
 file(REMOVE_RECURSE
   "CMakeFiles/res.dir/link.d"
+  "CMakeFiles/res.dir/src/command_input.cpp.o"
+  "CMakeFiles/res.dir/src/command_input.cpp.o.d"
+  "CMakeFiles/res.dir/src/cube_camera.cpp.o"
+  "CMakeFiles/res.dir/src/cube_camera.cpp.o.d"
   "CMakeFiles/res.dir/src/cube_device.cpp.o"
   "CMakeFiles/res.dir/src/cube_device.cpp.o.d"
   "CMakeFiles/res.dir/src/cube_model.cpp.o"

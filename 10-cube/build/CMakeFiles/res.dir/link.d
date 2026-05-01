@@ -2,6 +2,8 @@ res: \
   /usr/lib/gcc/x86_64-linux-gnu/14/../../../x86_64-linux-gnu/Scrt1.o \
   /usr/lib/gcc/x86_64-linux-gnu/14/../../../x86_64-linux-gnu/crti.o \
   /usr/lib/gcc/x86_64-linux-gnu/14/crtbeginS.o \
+  CMakeFiles/res.dir/src/command_input.cpp.o \
+  CMakeFiles/res.dir/src/cube_camera.cpp.o \
   CMakeFiles/res.dir/src/cube_device.cpp.o \
   CMakeFiles/res.dir/src/cube_model.cpp.o \
   CMakeFiles/res.dir/src/cube_pipeline.cpp.o \
@@ -53,6 +55,10 @@ res: \
 /usr/lib/gcc/x86_64-linux-gnu/14/../../../x86_64-linux-gnu/crti.o:
 
 /usr/lib/gcc/x86_64-linux-gnu/14/crtbeginS.o:
+
+CMakeFiles/res.dir/src/command_input.cpp.o:
+
+CMakeFiles/res.dir/src/cube_camera.cpp.o:
 
 CMakeFiles/res.dir/src/cube_device.cpp.o:
 

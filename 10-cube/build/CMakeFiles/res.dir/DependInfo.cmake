@@ -8,6 +8,8 @@ set(CMAKE_DEPENDS_LANGUAGES
 
 # The set of dependency files which are needed:
 set(CMAKE_DEPENDS_DEPENDENCY_FILES
+  "/home/kanja/projects/GraphicsShowCase/10-cube/src/command_input.cpp" "CMakeFiles/res.dir/src/command_input.cpp.o" "gcc" "CMakeFiles/res.dir/src/command_input.cpp.o.d"
+  "/home/kanja/projects/GraphicsShowCase/10-cube/src/cube_camera.cpp" "CMakeFiles/res.dir/src/cube_camera.cpp.o" "gcc" "CMakeFiles/res.dir/src/cube_camera.cpp.o.d"
   "/home/kanja/projects/GraphicsShowCase/10-cube/src/cube_device.cpp" "CMakeFiles/res.dir/src/cube_device.cpp.o" "gcc" "CMakeFiles/res.dir/src/cube_device.cpp.o.d"
   "/home/kanja/projects/GraphicsShowCase/10-cube/src/cube_model.cpp" "CMakeFiles/res.dir/src/cube_model.cpp.o" "gcc" "CMakeFiles/res.dir/src/cube_model.cpp.o.d"
   "/home/kanja/projects/GraphicsShowCase/10-cube/src/cube_pipeline.cpp" "CMakeFiles/res.dir/src/cube_pipeline.cpp.o" "gcc" "CMakeFiles/res.dir/src/cube_pipeline.cpp.o.d"

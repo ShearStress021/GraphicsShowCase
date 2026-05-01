@@ -213,6 +213,54 @@ glfw/fast:
 	$(MAKE) $(MAKESILENT) -f _deps/glfw-build/src/CMakeFiles/glfw.dir/build.make _deps/glfw-build/src/CMakeFiles/glfw.dir/build
 .PHONY : glfw/fast
 
+src/command_input.o: src/command_input.cpp.o
+.PHONY : src/command_input.o
+
+# target to build an object file
+src/command_input.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/res.dir/build.make CMakeFiles/res.dir/src/command_input.cpp.o
+.PHONY : src/command_input.cpp.o
+
+src/command_input.i: src/command_input.cpp.i
+.PHONY : src/command_input.i
+
+# target to preprocess a source file
+src/command_input.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/res.dir/build.make CMakeFiles/res.dir/src/command_input.cpp.i
+.PHONY : src/command_input.cpp.i
+
+src/command_input.s: src/command_input.cpp.s
+.PHONY : src/command_input.s
+
+# target to generate assembly for a file
+src/command_input.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/res.dir/build.make CMakeFiles/res.dir/src/command_input.cpp.s
+.PHONY : src/command_input.cpp.s
+
+src/cube_camera.o: src/cube_camera.cpp.o
+.PHONY : src/cube_camera.o
+
+# target to build an object file
+src/cube_camera.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/res.dir/build.make CMakeFiles/res.dir/src/cube_camera.cpp.o
+.PHONY : src/cube_camera.cpp.o
+
+src/cube_camera.i: src/cube_camera.cpp.i
+.PHONY : src/cube_camera.i
+
+# target to preprocess a source file
+src/cube_camera.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/res.dir/build.make CMakeFiles/res.dir/src/cube_camera.cpp.i
+.PHONY : src/cube_camera.cpp.i
+
+src/cube_camera.s: src/cube_camera.cpp.s
+.PHONY : src/cube_camera.s
+
+# target to generate assembly for a file
+src/cube_camera.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/res.dir/build.make CMakeFiles/res.dir/src/cube_camera.cpp.s
+.PHONY : src/cube_camera.cpp.s
+
 src/cube_device.o: src/cube_device.cpp.o
 .PHONY : src/cube_device.o
 
@@ -445,6 +493,12 @@ help:
 	@echo "... update_mappings"
 	@echo "... glfw"
 	@echo "... res"
+	@echo "... src/command_input.o"
+	@echo "... src/command_input.i"
+	@echo "... src/command_input.s"
+	@echo "... src/cube_camera.o"
+	@echo "... src/cube_camera.i"
+	@echo "... src/cube_camera.s"
 	@echo "... src/cube_device.o"
 	@echo "... src/cube_device.i"
 	@echo "... src/cube_device.s"

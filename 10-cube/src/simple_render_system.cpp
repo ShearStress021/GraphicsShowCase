@@ -5,6 +5,7 @@
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
 #include <glm/glm.hpp>
 #include <glm/gtc/constants.hpp>
+#include <iostream>
 
 // std
 #include <array>
@@ -55,22 +56,20 @@ void SimpleRenderSystem::createPipeline(VkRenderPass renderPass) {
   pipelineConfig.pipelineLayout = pipelineLayout;
   lvePipeline = std::make_unique<Pipeline>(
       lveDevice,
-      "shaders/simple_shader.vert.spv",
-      "shaders/simple_shader.frag.spv",
+      "shaders/shader.vert.spv",
+      "shaders/shader.frag.spv",
       pipelineConfig);
 }
 
 void SimpleRenderSystem::renderGameObjects(
-    VkCommandBuffer commandBuffer, std::vector<GameObject>& gameObjects) {
+    VkCommandBuffer commandBuffer, std::vector<GameObject>& gameObjects, const Camera& camera) {
   lvePipeline->bind(commandBuffer);
 
+  auto projectionView = camera.getProjection() * camera.getView();
   for (auto& obj : gameObjects) {
-    obj.transform.rotation.y = glm::mod(obj.transform.rotation.y + 0.00001f, glm::two_pi<float>());
-    obj.transform.rotation.x = glm::mod(obj.transform.rotation.x + 0.000005f, glm::two_pi<float>());
-
     SimplePushConstantData push{};
     push.color = obj.color;
-    push.transform = obj.transform.mat4();
+    push.transform = projectionView  * obj.transform.mat4();
 
     vkCmdPushConstants(
         commandBuffer,
