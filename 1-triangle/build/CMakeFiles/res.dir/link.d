@@ -36,9 +36,15 @@ res: \
   /usr/lib/gcc/x86_64-linux-gnu/14/libgcc.a \
   /usr/lib/gcc/x86_64-linux-gnu/14/crtendS.o \
   /usr/lib/gcc/x86_64-linux-gnu/14/../../../x86_64-linux-gnu/crtn.o \
+  /lib/i386-linux-gnu/libxcb.so.1 \
+  /usr/lib/i386-linux-gnu/libxcb.so.1 \
   /lib/x86_64-linux-gnu/libxcb.so.1 \
   /lib64/ld-linux-x86-64.so.2 \
+  /lib/i386-linux-gnu/libXau.so.6 \
+  /usr/lib/i386-linux-gnu/libXau.so.6 \
   /lib/x86_64-linux-gnu/libXau.so.6 \
+  /lib/i386-linux-gnu/libXdmcp.so.6 \
+  /usr/lib/i386-linux-gnu/libXdmcp.so.6 \
   /lib/x86_64-linux-gnu/libXdmcp.so.6
 
 /usr/lib/gcc/x86_64-linux-gnu/14/../../../x86_64-linux-gnu/Scrt1.o:
@@ -115,10 +121,22 @@ _deps/glfw-build/src/libglfw3.a:
 
 /usr/lib/gcc/x86_64-linux-gnu/14/../../../x86_64-linux-gnu/crtn.o:
 
+/lib/i386-linux-gnu/libxcb.so.1:
+
+/usr/lib/i386-linux-gnu/libxcb.so.1:
+
 /lib/x86_64-linux-gnu/libxcb.so.1:
 
 /lib64/ld-linux-x86-64.so.2:
 
+/lib/i386-linux-gnu/libXau.so.6:
+
+/usr/lib/i386-linux-gnu/libXau.so.6:
+
 /lib/x86_64-linux-gnu/libXau.so.6:
+
+/lib/i386-linux-gnu/libXdmcp.so.6:
+
+/usr/lib/i386-linux-gnu/libXdmcp.so.6:
 
 /lib/x86_64-linux-gnu/libXdmcp.so.6:

@@ -116,12 +116,9 @@ set(CMAKE_MAKEFILE_DEPENDS
   "/usr/share/cmake-3.31/Modules/ExternalProject/shared_internal_commands.cmake"
   "/usr/share/cmake-3.31/Modules/FetchContent.cmake"
   "/usr/share/cmake-3.31/Modules/FetchContent/CMakeLists.cmake.in"
-  "/usr/share/cmake-3.31/Modules/FindFontconfig.cmake"
-  "/usr/share/cmake-3.31/Modules/FindFreetype.cmake"
   "/usr/share/cmake-3.31/Modules/FindGit.cmake"
   "/usr/share/cmake-3.31/Modules/FindPackageHandleStandardArgs.cmake"
   "/usr/share/cmake-3.31/Modules/FindPackageMessage.cmake"
-  "/usr/share/cmake-3.31/Modules/FindPkgConfig.cmake"
   "/usr/share/cmake-3.31/Modules/FindThreads.cmake"
   "/usr/share/cmake-3.31/Modules/FindVulkan.cmake"
   "/usr/share/cmake-3.31/Modules/FindX11.cmake"
@@ -146,7 +143,6 @@ set(CMAKE_MAKEFILE_DEPENDS
   "/usr/share/cmake-3.31/Modules/Platform/Linux-Initialize.cmake"
   "/usr/share/cmake-3.31/Modules/Platform/Linux.cmake"
   "/usr/share/cmake-3.31/Modules/Platform/UnixPaths.cmake"
-  "/usr/share/cmake-3.31/Modules/SelectLibraryConfigurations.cmake"
   "/usr/share/cmake-3.31/Modules/WriteBasicConfigVersionFile.cmake"
   )
 
