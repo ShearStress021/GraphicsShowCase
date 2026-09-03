@@ -1,7 +1,6 @@
-# Graphical Show case project
+# Graphical ShowCase project
 
-A collection of **graphics programming experiments and projects using Vulkan** and modern **C++**.  
-This repository focuses on low-level rendering concepts, GPU programming, and building a deeper understanding of how modern graphics pipelines work.
+A collection of graphics programming projects exploring different approaches to creating windows, handling graphics, and working with low-level graphics APIs
 
 The goal is **learning by building** — from basic triangle rendering to more advanced rendering techniques.
 
@@ -10,18 +9,15 @@ The goal is **learning by building** — from basic triangle rendering to more a
 ## 🛠️ Tech Stack
 
 - **Language:** C++ (C++17 / C++20)
-- **Graphics API:** Vulkan
-- **Windowing:**
-  - GLFW (primary)
-- **Math:**
-  - GLM
-- **Utilities:**
-  - Vulkan Validation Layers
-  - volk (optional)
 - **Build System:**
   - CMake
 
 ---
+## Project Structure
+- **VulkanApi:**
+    - simpleTriangle
+- **WindowApi:**
+    - cube console3d
 
 
 ## 🚀 Getting Started
