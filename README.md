@@ -36,6 +36,10 @@ Verify Vulkan installation:
 ```bash
 vulkaninfo
 ````
+Verify CMake installation
+```bash
+cmake --version
+```
 
 
 ---
