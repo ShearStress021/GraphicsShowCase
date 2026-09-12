@@ -42,7 +42,7 @@ vulkaninfo
 ### Build a Specific Game (CMake)
 
 ```bash
-cd games/game-name
+cd api_type/proj-name
 mkdir build
 cd build
 cmake ..
