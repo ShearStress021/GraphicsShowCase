@@ -4,7 +4,8 @@
 class MyRectangle : public ConsoleEngine {
 
 	bool userConstruct(){
-		drawTriangle(30,10,20,20,40,10,20,40);
+		drawTriangle(10,10,40,10,10,20, 'o');
+		drawTriangle(10,20,40,20,40,10, 'o');
 
 		return true;
 	}
