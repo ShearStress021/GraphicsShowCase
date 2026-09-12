@@ -18,6 +18,8 @@ The goal is **learning by building** — from basic triangle rendering to more a
     - simpleTriangle
 - **WindowApi:**
     - cube console3d
+- **Raylib Library:**
+    - gravity simulation
 
 
 ## 🚀 Getting Started
