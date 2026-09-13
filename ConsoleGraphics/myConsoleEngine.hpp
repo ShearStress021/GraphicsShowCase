@@ -79,7 +79,7 @@ class ConsoleEngine {
 
 		virtual bool userConstruct() = 0;
 
-		void initConsoleEngine(){
+		void init(){
 			renderer();
 		}
 

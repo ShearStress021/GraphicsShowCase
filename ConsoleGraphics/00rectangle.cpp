@@ -16,8 +16,7 @@ class MyRectangle : public ConsoleEngine {
 int main(){
 	MyRectangle res{};
 	res.createWindow(130, 35, "renctangle");
-
-	res.initConsoleEngine();
+	res.init();
 
 }
 
