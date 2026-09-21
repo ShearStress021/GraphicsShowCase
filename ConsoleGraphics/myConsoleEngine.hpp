@@ -48,15 +48,32 @@ class ConsoleEngine {
 			}
 
 
+			// Set up console font
+			CONSOLE_FONT_INFOEX consFont{};
+			consFont.cbSize = sizeof(consFont);
+			consFont.nFont = 0;
+			consFont.dwFontSize.X = 4;
+			consFont.dwFontSize.Y = 4;
+			consFont.FontWeight = FW_NORMAL;
+			consFont.FontFamily = FF_SWISS;
+
+			if(!SetCurrentConsoleFontEx(handleConsole,false, &consFont)){
+				return CustomError("Font Setting not Implemented");
+			}
+
+
 			CONSOLE_SCREEN_BUFFER_INFO screenInfo{};
 			if(!GetConsoleScreenBufferInfo(handleConsole, &screenInfo)){
 				std::cerr << "GetConsoleScreenBufferInfo Failed\n";
 				CloseHandle(handleConsole);
 				return 1;
-
-
 			}
-
+			if (screenWidth > screenInfo.dwMaximumWindowSize.X){
+				return CustomError("Screen width greater than font X");
+			}
+			if (screenHeight > screenInfo.dwMaximumWindowSize.Y){
+				return CustomError("Screen height greater than font Y");
+			}
 			windowRect = {0,0, (short)(screenWidth - 1), (short)(screenHeight -1 )};
 
 			if(!SetConsoleWindowInfo(handleConsole, TRUE, &windowRect)){
@@ -67,6 +84,8 @@ class ConsoleEngine {
 
 			screen = new CHAR_INFO[screenWidth * screenHeight];
 			memset(screen, 0, sizeof(CHAR_INFO) * screenWidth * screenHeight);
+
+			SetConsoleCtrlHandler((PHANDLER_ROUTINE)NULL, TRUE);
 
 			return 0;
 
@@ -142,6 +161,21 @@ class ConsoleEngine {
 			drawLine(x1,y1,x2,y2,c,col);
 			drawLine(x2,y2,x3,y3,c,col);
 			drawLine(x3,y3,x1,y1,c,col);
+		}
+
+		std::uint8_t getScreenWidth(){
+			return screenWidth;
+		}
+		std::uint8_t getScreenHeight(){
+			return screenHeight;
+		}
+
+
+	protected:
+		int CustomError(const char *text){
+			char buffer[256];
+			std::snprintf(buffer,sizeof(buffer), "Error %s",text);
+			return 0;
 		}
 
 
