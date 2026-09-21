@@ -7,7 +7,7 @@ res: $(target)
 
 
 run: clean res
-	./res
+	./res.exe
 
 
 clean:

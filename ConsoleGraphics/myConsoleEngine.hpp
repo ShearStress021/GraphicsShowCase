@@ -2,6 +2,7 @@
 #include <Windows.h>
 #include <iostream>
 #include <cstdint>
+#include <cmath>
 
 class ConsoleEngine {
 
@@ -102,12 +103,13 @@ class ConsoleEngine {
 			renderer();
 		}
 
-		void draw(int x, int y, short c= '-', short col = 0x0009){
+		void draw(int x, int y, short c= 0x2588, short col = 0x0009){
 			screen[y * screenWidth + x].Char.UnicodeChar = c;
 			screen[y * screenWidth + x].Attributes = col;
 		}
 
 		void drawLine(int x1, int y1,int x2, int y2, short c = '-', short col = 0x0009){
+
 			int dx = std::abs(x2 - x1);
 			int dy = std::abs(y2 - y1);
 
@@ -157,10 +159,12 @@ class ConsoleEngine {
 
 		}
 
-		void drawTriangle(int x1, int y1, int x2, int y2, int x3, int y3, short c = 'o', short col = 0x0009) {
-			drawLine(x1,y1,x2,y2,c,col);
-			drawLine(x2,y2,x3,y3,c,col);
-			drawLine(x3,y3,x1,y1,c,col);
+		void drawTriangle(int x1, int y1, int x2, int y2, int x3, int y3, short c = 0x2588, short col = 0x0009) {
+			auto toCell = [](float v) {return static_cast<int>(std::lround(v));};
+			drawLine(toCell(x1),toCell(y1),toCell(x2),toCell(y2),c,col);
+			drawLine(toCell(x2),toCell(y2),toCell(x3),toCell(y3),c,col);
+			drawLine(toCell(x3),toCell(y3),toCell(x1),toCell(y1),c,col);
+			
 		}
 
 		std::uint8_t getScreenWidth(){
@@ -188,7 +192,7 @@ class ConsoleEngine {
 
 				// clear console
 				for(int i{}; i < screenWidth * screenHeight; i++) {
-					screen[i].Char.UnicodeChar= ' ';
+					screen[i].Char.UnicodeChar = ' ';
 					screen[i].Attributes = FOREGROUND_GREEN;
 				}
 
@@ -200,14 +204,14 @@ class ConsoleEngine {
 				// boarder 
 				for(int i {}; i < screenWidth; i++){
 					screen[i].Char.UnicodeChar = '=';
-					screen[2* screenWidth + i].Char.UnicodeChar= '=';
+					screen[2* screenWidth + i].Char.UnicodeChar = '=';
 				}
 
 
 				char title[256];
 				std::snprintf(title, sizeof(title), "My game Engine %s ",appName.c_str());
 				SetConsoleTitle(title);
-				WriteConsoleOutput(handleConsole, screen, 
+				WriteConsoleOutputW(handleConsole, screen, 
 						{(short)screenWidth , (short)screenHeight}, {0,0}, &windowRect);
 				if (GetAsyncKeyState((unsigned char)('\x20')) & 0x8000) running = true;
 				

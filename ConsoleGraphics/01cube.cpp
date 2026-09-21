@@ -23,6 +23,9 @@ class Cube3d : public ConsoleEngine {
 	private:
 		Vertex cubePoints{};
 		Mat4 matrixProj{};
+		Vector3 camera{0.f,0.f,0.f};
+		float cubeSize{2.f};
+		float cubeDistance{4.f};
 	private:
 		bool userConstruct(){
 			createPerceptionPespective();
@@ -50,11 +53,12 @@ class Cube3d : public ConsoleEngine {
 		void createPerceptionPespective(){
 			float nearPlane{0.1f};
 			float farPlane{100.f};
-			float aspectRatio {static_cast<float>(getScreenHeight())/static_cast<float>(getScreenWidth())};
+			float cellAspect{2.f};
+			float aspectRatio {static_cast<float>(getScreenHeight())/(getScreenWidth()) * cellAspect};
 			float fieldOfView{90.f};
 			float fieldOfViewRad{1.0f/std::tanf(fieldOfView * 0.5 * 3.14159f / 180)};
 
-			matrixProj.mat[0][0] = aspectRatio * fieldOfView;
+			matrixProj.mat[0][0] = aspectRatio * fieldOfViewRad;
 			matrixProj.mat[1][1] = fieldOfViewRad;
 			matrixProj.mat[2][2] =  farPlane / (farPlane - nearPlane);
 			matrixProj.mat[3][2] = (-farPlane * nearPlane) / (farPlane - nearPlane);
@@ -89,33 +93,47 @@ class Cube3d : public ConsoleEngine {
 			};
 
 			for (auto tri : cubePoints.triangles) {
-				TrianglePoints projPoints, translated;
-				translated.points[0].z = tri.points[0].z + 3.f;
-				translated.points[1].z = tri.points[1].z + 3.f;
-				translated.points[2].z = tri.points[2].z + 3.f;
+				TrianglePoints  translated , projPoints;
+				translated = tri;
+				for(auto& p : translated.points) p.z += 3.f;
 
+
+				//translated.points[0].z = tri.points[0].z + 3.f;
+				//translated.points[1].z = tri.points[1].z + 3.f;
+				//translated.points[2].z = tri.points[2].z + 3.f;
+
+
+
+				for(int i = 0; i < 3; i++){
+					multiplyVector3Mat4(translated.points[i], projPoints.points[i], matrixProj);
+					projPoints.points[i].x += 1.f;
+					projPoints.points[i].y += 1.f;
+					projPoints.points[i].x *= 0.5f * static_cast<float>(getScreenWidth());
+					projPoints.points[i].y *= 0.5f * static_cast<float>(getScreenHeight());
+
+				}
 
 				
-				multiplyVector3Mat4(translated.points[0], projPoints.points[0], matrixProj);
-				multiplyVector3Mat4(translated.points[1], projPoints.points[1], matrixProj);
-				multiplyVector3Mat4(translated.points[2], projPoints.points[2], matrixProj);
+				//multiplyVector3Mat4(translated.points[0], projPoints.points[0], matrixProj);
+				//multiplyVector3Mat4(translated.points[1], projPoints.points[1], matrixProj);
+				//multiplyVector3Mat4(translated.points[2], projPoints.points[2], matrixProj);
 
 
 
 
-				projPoints.points[0].x += 1.f; projPoints.points[0].y += 1.f;
-				projPoints.points[1].x += 1.f; projPoints.points[1].y += 1.f;
-				projPoints.points[2].x += 1.f; projPoints.points[2].y += 1.f;
+				//projPoints.points[0].x += 1.f; projPoints.points[0].y += 1.f;
+				//projPoints.points[1].x += 1.f; projPoints.points[1].y += 1.f;
+				//projPoints.points[2].x += 1.f; projPoints.points[2].y += 1.f;
 
-				projPoints.points[0].x *= 0.5f * static_cast<float>(getScreenWidth());
-				projPoints.points[0].y *= 0.5f * static_cast<float>(getScreenHeight());
-				projPoints.points[1].x *= 0.5f * static_cast<float>(getScreenWidth());
-				projPoints.points[1].y *= 0.5f * static_cast<float>(getScreenHeight());
-				projPoints.points[2].x *= 0.5f * static_cast<float>(getScreenWidth());
-				projPoints.points[2].y *= 0.5f * static_cast<float>(getScreenHeight());
+				//projPoints.points[0].x *= 0.5f * static_cast<float>(getScreenWidth());
+				//projPoints.points[0].y *= 0.5f * static_cast<float>(getScreenHeight());
+				//projPoints.points[1].x *= 0.5f * static_cast<float>(getScreenWidth());
+				//projPoints.points[1].y *= 0.5f * static_cast<float>(getScreenHeight());
+				//projPoints.points[2].x *= 0.5f * static_cast<float>(getScreenWidth());
+				//projPoints.points[2].y *= 0.5f * static_cast<float>(getScreenHeight());
 
-				drawTriangle(projPoints.points[0].x, projPoints.points[0].y, projPoints.points[1].x, projPoints.points[1].y,
-						projPoints.points[2].x, projPoints.points[2].y,'o', 0x0009);
+				drawTriangle(projPoints.points[0].x, projPoints.points[0].y, projPoints.points[1].x, 
+						projPoints.points[1].y,	projPoints.points[2].x, projPoints.points[2].y);
 
 
 			}
@@ -134,7 +152,7 @@ class Cube3d : public ConsoleEngine {
 
 int main(){
 	Cube3d res{};
-	res.createWindow(130,35,"3d Cube");
+	if(res.createWindow(130,35,"3d Cube") != 0) return 1;
 	res.init();
 }
 
