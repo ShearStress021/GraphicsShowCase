@@ -48,7 +48,6 @@ class ConsoleEngine {
 
 			}
 
-
 			// Set up console font
 			CONSOLE_FONT_INFOEX consFont{};
 			consFont.cbSize = sizeof(consFont);
@@ -154,9 +153,7 @@ class ConsoleEngine {
 
 				}
 
-
 			}
-
 		}
 
 		void drawTriangle(int x1, int y1, int x2, int y2, int x3, int y3, short c = 0x2588, short col = 0x0009) {
