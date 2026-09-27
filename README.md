@@ -20,6 +20,8 @@ The goal is **learning by building** — from basic triangle rendering to more a
     - cube console3d
 - **Raylib Library:**
     - gravity simulation
+- **GLFW Library**
+    - shapes
 
 
 ## 🚀 Getting Started
@@ -47,7 +49,5 @@ cmake --version
 
 ```bash
 cd api_type/proj-name
-mkdir build
-cd build
-cmake ..
-cmake --build .
+cmake -B build
+cmake --build build
