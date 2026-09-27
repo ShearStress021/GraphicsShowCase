@@ -1,0 +1,9 @@
+{
+	"InstallScripts" : 
+	[
+		"D:/projects/GraphicsShowCase/GLFWGraphical/ShapesDraw/build/cmake_install.cmake",
+		"D:/projects/GraphicsShowCase/GLFWGraphical/ShapesDraw/build/_deps/glfw-build/cmake_install.cmake",
+		"D:/projects/GraphicsShowCase/GLFWGraphical/ShapesDraw/build/_deps/glfw-build/src/cmake_install.cmake"
+	],
+	"Parallel" : false
+}
