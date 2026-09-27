@@ -26,15 +26,25 @@ class Cube3d : public ConsoleEngine {
 		Vector3 camera{0.f,0.f,0.f};
 		float cubeSize{2.f};
 		float cubeDistance{4.f};
+		bool ready{false};
+		std::uint32_t startTick{};
 	private:
 		bool userConstruct(){
 			createPerceptionPespective();
+			buildCube();
 			drawCube();
 			//drawTriangle(30,10,20,40,40,10);
-
-
 			return true;
+		}
 
+		static Vector3 rotateX(const Vector3& v, float a){
+			float c = std::cos(a), s = std::sin(c);
+			return {v.x, v.y * c - v.z * s, v.y * s + v.z * c};
+		}
+
+		static Vector3 rotateY(const Vector3& v, float a){
+			float c = std::cos(a), s = std::sin(c);
+			return {v.x * c + v.y * s, v.y, -v.x * s + v.z * c};
 		}
 
 		void multiplyVector3Mat4(Vector3 &in, Vector3 &res, Mat4 &mat4) {
@@ -65,7 +75,7 @@ class Cube3d : public ConsoleEngine {
 			matrixProj.mat[2][3] = 1.0f;
 			matrixProj.mat[3][3] = 0.0f;
 		}
-		void drawCube(){
+		void buildCube(){
 			cubePoints.triangles = {
 				// SOUTH
 				{ 0.0f, 0.0f, 0.0f,    0.0f, 1.0f, 0.0f,    1.0f, 1.0f, 0.0f   },
@@ -92,22 +102,61 @@ class Cube3d : public ConsoleEngine {
 				{ 1.0f, 0.0f, 1.0f,    0.0f, 0.0f, 0.0f,    1.0f, 0.0f, 0.0f   },
 			};
 
+			for(auto& tri: cubePoints.triangles){
+				for(auto& p: tri.points){
+					p.x -= 0.5f;
+					p.y -= 0.5f;
+					p.z -= 0.5f;
+				}
+			}
+
+
+		}
+		void drawCube(){
 			for (auto tri : cubePoints.triangles) {
-				TrianglePoints  translated , projPoints;
+				TrianglePoints  translated , projPoints, moved;
 				translated = tri;
-				for(auto& p : translated.points) p.z += 3.f;
+
+				for(size_t i{}; i < 3; i++){
+					Vector3 p = tri.points[i];
+					p.x *= 2.f;
+					p.y *= 2.f;
+					p.z *= 2.f;
+					p = rotateX(rotateY(p, 35.f), 35.f * 0.5f);
+					p.z += 4.f;
+					moved.points[i] = p;
+				}
+				//for(auto& p : translated.points) p.z += 3.f;
 
 
 				//translated.points[0].z = tri.points[0].z + 3.f;
 				//translated.points[1].z = tri.points[1].z + 3.f;
 				//translated.points[2].z = tri.points[2].z + 3.f;
 
+				const Vector3& a = moved.points[0];
+				Vector3 e1{moved.points[1].x - a.x, moved.points[1].y - a.y, moved.points[1].z - a.z};
+				Vector3 e2{moved.points[2].x - a.x, moved.points[2].y - a.y, moved.points[2].z - a.z};
+
+
+				Vector3 normal {
+					e1.y * e2.z  - e1.z * e2.y,
+					e1.z * e2.x  - e1.z * e2.y,
+					e1.x * e2.y  - e1.y * e2.x,
+				};
+
+				Vector3 toTri {a.x - camera.x, a.y - camera.y, a.z - camera.z};
+
+				if(normal.x * toTri.x + normal.y * toTri.y + normal.z * toTri.z >= 0.0f) continue;
+
+				
+				
+
 
 
 				for(int i = 0; i < 3; i++){
-					multiplyVector3Mat4(translated.points[i], projPoints.points[i], matrixProj);
-					projPoints.points[i].x += 1.f;
-					projPoints.points[i].y += 1.f;
+					multiplyVector3Mat4(moved.points[i], projPoints.points[i], matrixProj);
+					//projPoints.points[i].x += 1.f;
+					//projPoints.points[i].y += 1.f;
 					projPoints.points[i].x *= 0.5f * static_cast<float>(getScreenWidth());
 					projPoints.points[i].y *= 0.5f * static_cast<float>(getScreenHeight());
 
