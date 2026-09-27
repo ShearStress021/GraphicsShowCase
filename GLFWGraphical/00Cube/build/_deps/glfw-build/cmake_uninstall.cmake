@@ -1,6 +1,6 @@
 
 if (NOT EXISTS "D:/projects/GraphicsShowCase/GLFWGraphical/00Cube/build/_deps/glfw-build/install_manifest.txt")
-  message(FATAL_ERROR "Cannot find install manifest: \"D:/projects/GraphicsShowCase/GLFWGraphical/00Cube/build/_deps/glfw-build/install_manifest.txt\"")
+    message(FATAL_ERROR "Cannot find install manifest: \"D:/projects/GraphicsShowCase/GLFWGraphical/00Cube/build/_deps/glfw-build/install_manifest.txt\"")
 endif()
 
 file(READ "D:/projects/GraphicsShowCase/GLFWGraphical/00Cube/build/_deps/glfw-build/install_manifest.txt" files)
