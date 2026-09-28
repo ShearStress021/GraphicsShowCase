@@ -5,6 +5,7 @@
 #include <Windows.h>
 #include <cstdint>
 #include <string>
+#include <cmath>
 #include <chrono>
 #include <thread>
 
@@ -42,6 +43,14 @@ class GLFWEngine {
 
 		void initWindow(){
 			renderer();
+		}
+
+		uint16_t getScreenWidth(){
+			return screenwidth;
+		}
+
+		uint16_t getScreenHeight(){
+			return screenheight;
 		}
 
 
