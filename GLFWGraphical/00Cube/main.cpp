@@ -12,7 +12,7 @@ struct Mat4 {
 class Cube : public GLFWEngine {
 	protected:
 		bool userConstruct(){
-			CreatePersepectiveProjection();
+			createPersepectiveProjection();
 			drawCubeIndexed();
 //			drawLine(100,200,550,450, {0,0,255});
 			return true;
@@ -47,7 +47,7 @@ class Cube : public GLFWEngine {
 			}
 		}
 
-		void CreatePersepectiveProjection(){
+		void createPersepectiveProjection(){
 			float nearPlane{0.1f};
 			float farPlane{100.f};
 			float cellAspect{2.f};
@@ -66,7 +66,7 @@ class Cube : public GLFWEngine {
 
 		Vector3 projectPoint(Vector3 point){
 			point.x -= 1.5f;
-			point.y += 1.f;
+			point.y += 1.5f;
 			point.z += 3.f;
 			Vector3 res{};
 
@@ -81,7 +81,7 @@ class Cube : public GLFWEngine {
 			for(size_t i{}; i < 8; i++) s[i] = projectPoint(vertices[i]);
 
 			for(auto& t: cubeTris) 
-				drawTriangle(s[t[0]].x, s[t[0]].y, s[t[1]].x, s[t[1]].y, s[t[2]].x, s[t[2]].y,{255,100,50});
+				drawTriangle(s[t[0]].x, s[t[0]].y, s[t[1]].x, s[t[1]].y, s[t[2]].x, s[t[2]].y,{0,255,255});
 		}
 
 
