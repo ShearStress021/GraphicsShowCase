@@ -126,16 +126,8 @@ class GLFWEngine {
 
 	public:
 		void drawLine(int x1, int y1, int x2, int y2, Color color){
-			int dx = std::abs(x2 - x1);
-			int dy = std::abs(y2 - y1);
-
-			int x = x1;
-			int y = y1;
-
-			int cx = (x1 < x2) ? 1 : -1;
-			int cy = (y1 < y2) ? 1 : -1;
-
-
+			int dx = std::abs(x2 - x1), x = x1, cx = (x1 < x2) ? 1 : -1;
+			int dy = std::abs(y2 - y1), y = y1, cy = (y1 < y2) ? 1 : -1;
 			ColorPixel(screen,screenwidth,x,y,color);
 
 			// slope (dy/dx) <= 1;
@@ -152,7 +144,6 @@ class GLFWEngine {
 						ColorPixel(screen,screenwidth,x,y,color);
 						P = P + 2 * dy - 2 * dx;
 					}
-
 				}
 			}else {    // slope (dy/dx) > 1;
 				int P = ((2 *dx) - dy); // Decision Parameter
@@ -167,7 +158,6 @@ class GLFWEngine {
 						ColorPixel(screen,screenwidth,x,y,color);
 						P = P + 2 * dx - 2 * dy;
 					}
-
 				}
 
 			}
